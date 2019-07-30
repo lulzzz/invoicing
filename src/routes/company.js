@@ -11,7 +11,6 @@ router.post('/company', (req, res) => {
     values.push(req.body.postalCode)
     values.push(req.body.city)
     values.push(req.body.country)
-    console.log(values);
     var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
     connection.query(sql, [values], function (err, result) {
         if (err) res.status(400).send(err);
@@ -28,8 +27,6 @@ router.get('/company', (req, res) => {
 })
 
 router.patch('/company', (req, res) => {
-    console.log(req.body);
-
     var sql = "UPDATE company SET ?";
     connection.query(sql, [req.body],  function (err, result) {
         if (err) res.status(400).send('Bad request')
