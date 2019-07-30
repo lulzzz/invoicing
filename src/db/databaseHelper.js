@@ -8,7 +8,6 @@ var getProductId = (code) => {
                 if (err)
                     reject(err);
                 else{
-                    console.log(result.length);
                     if(result.length === 0){
                         reject('Product with code ' + code + ' does not exist.')
                         return
@@ -71,7 +70,6 @@ module.exports = {
             tmp.push(product.tax)
             values.push(tmp)
         }
-        console.log(values);
         return new Promise((resolve, reject) => {
             let sql = "INSERT INTO invoices_products (idInvoice, idProduct, unitPrice, quantity, tax) VALUES ?"
             connection.query(sql, [values], function (err, result) {
