@@ -4,34 +4,36 @@ const connection = require('../db/mysql');
 
 //Create a new user
 router.post('/company', (req, res) => {
-    var values = []
-    values.push(req.body.name)
-    values.push(req.body.nif)
-    values.push(req.body.address)
-    values.push(req.body.postalCode)
-    values.push(req.body.city)
-    values.push(req.body.country)
-    var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
-    connection.query(sql, [values], function (err, result) {
-        if (err) res.status(400).send(err);
-        else res.send('OK')
-      });
+  //TODO limit creation of company. only 1 can exist??
+  var values = []
+  values.push(req.body.name)
+  values.push(req.body.nif)
+  values.push(req.body.address)
+  values.push(req.body.postalCode)
+  values.push(req.body.city)
+  values.push(req.body.country)
+  var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
+  connection.query(sql, [values], function (err, result) {
+    if (err) res.status(400).send(err);
+    else res.send('OK')
+  });
 })
 
 router.get('/company', (req, res) => {
-    var sql = "SELECT * FROM company LIMIT 1";
-    connection.query(sql, function (err, result) {
-        if (err) res.status(400).send(err);
-        else res.send(result)
-      });
+  var sql = "SELECT * FROM company LIMIT 1";
+  connection.query(sql, function (err, result) {
+    if (err) res.status(400).send(err);
+    else res.send(result)
+  });
 })
 
 router.patch('/company', (req, res) => {
-    var sql = "UPDATE company SET ?";
-    connection.query(sql, [req.body],  function (err, result) {
-        if (err) res.status(400).send('Bad request')
-        else res.send(result)
-      });
+  //TODO limit patch field. (id cant be changed)
+  var sql = "UPDATE company SET ?";
+  connection.query(sql, [req.body], function (err, result) {
+    if (err) res.status(400).send('Bad request')
+    else res.send(result)
+  });
 })
 
 module.exports = router
