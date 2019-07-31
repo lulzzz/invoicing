@@ -44,20 +44,6 @@ exports.productPostValidation = [
 ]
 
 exports.invoiceValidation = [
-  // {
-  //     "type": "FS/FR",
-  //     "customerNIF": "123456789",
-  //     "products": [{
-  //         "code": "xxxxx",
-  //         "unitPrice": 10,
-  //         "tax": 23,
-  //         "quantity": 2
-  //     ??? "discount": ???
-  //     }],
-  //     "date": "yyyy/mm/dd"
-  //     ?????? "vencimento": ?????
-  // }
-
   check('type')
     .not().isEmpty().withMessage("type should not be empty")
     .exists().withMessage('type field must exist')
