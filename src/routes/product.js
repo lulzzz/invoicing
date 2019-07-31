@@ -8,7 +8,7 @@ router.post('/products', [
   check('productType', "Product type should not be empty").not().isEmpty(),
   check('productType', "Product type should be 'S', 'P', 'O', 'E' or 'I'").matches(/^(S|P|O|E|I){1}$/),
   check('code', "Product code should not be empty").not().isEmpty(),
-  check('descritpion', "Product description should not be empty").not().isEmpty(),
+  check('description', "Product description should not be empty").not().isEmpty(),
 ], (req, res) => {
 
   // Finds the validation errors in this request and wraps them in an object with handy functions
