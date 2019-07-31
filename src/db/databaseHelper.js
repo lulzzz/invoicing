@@ -36,9 +36,11 @@ module.exports = {
             connection.query('SELECT idCustomer FROM customers where nif = ?', [customerNIF], function (err, result) {
                 if (err)
                     reject(err)
+                else if (result.length === 0) {
+                    reject({ status: 404, message: 'Customer with nif ' + customerNIF + ' not found'})
+                }
                 else
                     resolve(result[0].idCustomer);
-                    //TODO erro quando nao e encontrado nif
             });
         })
     },
