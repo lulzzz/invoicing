@@ -1,32 +1,11 @@
 const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
+const validation = require('../middleware/validation');
 const { check, validationResult } = require('express-validator');
 
 //Create a new customer
-router.post('/customers', [ 
-  check('name')
-    .exists().withMessage('name field must exist')
-    .not().isEmpty().withMessage('name field must not be empty'),
-  check('nif')
-    .exists().withMessage('NIF must exist')
-    .not().isEmpty().withMessage('NIF must not be empty')
-    .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits'),
-  check('address')
-    .exists().withMessage('address field must exist')
-    .not().isEmpty().withMessage('address field must not be empty'),
-  check('postalCode')
-    .exists().withMessage('postal code field must exist')
-    .not().isEmpty().withMessage('postal code field must not be empty')
-    .matches(/^([0-9]{4}-[0-9]{3})$/).withMessage('postal code should be in the form nnnn-nnn'),
-  check('city')
-    .exists().withMessage('city field must exist')
-    .not().isEmpty().withMessage('city field must not be empty'),
-  check('country')
-    .exists().withMessage('country field must exist')
-    .not().isEmpty().withMessage('country field must not be empty')
-], (req, res) => {
+router.post('/customers', validation.customerCompanyPostValidation, (req, res) => {
 
   // send validation result
   const errors = validationResult(req);
@@ -66,11 +45,7 @@ router.get('/customers', (req, res) => {
   });
 })
 
-router.get('/customers/:nif', [
-  check('nif')
-    .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits')
-], (req, res) => {
+router.get('/customers/:nif', validation.nifValidation, (req, res) => {
 
   // send validation result
   const errors = validationResult(req);
@@ -91,11 +66,7 @@ router.get('/customers/:nif', [
   });
 })
 
-router.patch('/customers/:nif', [
-  check('nif')
-    .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits')
-], (req, res) => {
+router.patch('/customers/:nif', validation.nifValidation, (req, res) => {
 
   // send validation result
   const errors = validationResult(req);
@@ -110,7 +81,7 @@ router.patch('/customers/:nif', [
   if (!isValidOperation) {
     return res.status(400).send({ error: 'Invalid updates!' })
   }
-
+  //TODO if is valid operation, validate patch params
   var nif = req.params.nif
   var sql = "UPDATE customers SET ? where nif = ?";
   connection.query(sql, [req.body, nif], function (err, result) {
@@ -124,11 +95,7 @@ router.patch('/customers/:nif', [
   });
 })
 
-router.delete('/customers/:nif', [
-  check('nif')
-    .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits')
-], (req, res) => {
+router.delete('/customers/:nif', validation.nifValidation, (req, res) => {
 
   // send validation result
   const errors = validationResult(req);
