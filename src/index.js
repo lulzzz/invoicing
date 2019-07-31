@@ -14,6 +14,8 @@ app.use(companyRouter)
 app.use(productRouter)
 app.use(customerRouter)
 
+//TODO change error responses to be all in the same format {"error": "error message"}
+
 app.listen(port, () => {
     console.log('Server is up on port', port);
 })
