@@ -1,7 +1,7 @@
 const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
-const { param, check, validationResult } = require('express-validator');
+const { check, validationResult } = require('express-validator');
 
 //Create a new product
 router.post('/products', [
@@ -36,7 +36,7 @@ router.post('/products', [
           break;
       }
     }
-    else res.status(201).send('OK')
+    else res.status(201).send('Product with code ' + req.body.code + ' was created.')
   });
 
 })
@@ -85,7 +85,7 @@ router.patch('/products/:code', (req, res) => {
     else if (result.length === 0) {
       res.status(404).send("Product with code " + productCode + " could not be found.")
     }
-    else res.send(result)
+    else res.send('Product with code ' + productCode + ' was updated.')
   });
 })
 
@@ -100,7 +100,7 @@ router.delete('/products/:code', (req, res) => {
     else if (result.length === 0) {
       res.status(404).send("Product with code " + productCode + " could not be found.")
     }
-    else res.send(result)
+    else res.send('Product with code ' + nif + ' was deleted.')
   });
 })
 
