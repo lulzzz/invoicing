@@ -54,7 +54,7 @@ router.post('/invoices', async (req, res) => {
     
         await assignProductsToInvoice(resp.idInvoice, products)
     
-        res.send(resp.reference)
+        res.status(201).send(resp.reference)
     } catch (error) {
         res.status(400).send(error)
     }

@@ -36,7 +36,7 @@ router.post('/products', [
           break;
       }
     }
-    else res.send('OK')
+    else res.status(201).send('OK')
   });
 
 })

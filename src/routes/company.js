@@ -15,7 +15,7 @@ router.post('/company', (req, res) => {
   var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
   connection.query(sql, [values], function (err, result) {
     if (err) res.status(400).send(err);
-    else res.send('OK')
+    else res.status(201).send('OK')
   });
 })
 
