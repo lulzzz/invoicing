@@ -1,6 +1,8 @@
 const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
+const validation = require('../middleware/validation');
+const { validationResult } = require('express-validator');
 const { getCustomerId, getNoInvoices, insertInvoice, assignProductsToInvoice, getProductId } = require('../db/databaseHelper');
 
 //Get all invoices
@@ -20,7 +22,7 @@ router.get('/invoices', async (req, res) => {
 })
 
 //Create new invoice
-router.post('/invoices', async (req, res) => {
+router.post('/invoices', validation.invoiceValidation, async (req, res) => {
 
     // {
     //     "type": "FS/FR",
@@ -36,9 +38,13 @@ router.post('/invoices', async (req, res) => {
     //     ?????? "vencimento": ?????
     // }
 
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).send(errors);
+    }
 
     try {
+        //TODO verificar que data de invoice é posterior à do último
         var invoiceType = req.body.type
         var customerNIF = req.body.customerNIF
         var products = req.body.products
@@ -56,7 +62,10 @@ router.post('/invoices', async (req, res) => {
     
         res.status(201).send(resp.reference)
     } catch (error) {
-        res.status(400).send(error)
+        if(error.status === 404){
+           res.status(404).send(error.message)
+        }
+        else res.status(400).send(error.message)
     }
 })
 
