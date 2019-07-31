@@ -1,15 +1,11 @@
 const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
-const { check, validationResult } = require('express-validator');
+const validation = require('../middleware/validation');
+const { validationResult } = require('express-validator');
 
 //Create a new product
-router.post('/products', [
-  check('productType', "Product type should not be empty").not().isEmpty(),
-  check('productType', "Product type should be 'S', 'P', 'O', 'E' or 'I'").matches(/^(S|P|O|E|I){1}$/),
-  check('code', "Product code should not be empty").not().isEmpty(),
-  check('description', "Product description should not be empty").not().isEmpty(),
-], (req, res) => {
+router.post('/products', validation.productPostValidation, (req, res) => {
 
   // Finds the validation errors in this request and wraps them in an object with handy functions
   const errors = validationResult(req);
@@ -17,8 +13,6 @@ router.post('/products', [
     return res.status(422).send(errors);
   }
 
-  //TODO check if productType is acceptable
-  //TODO check if all fields are filled
   var values = []
   values.push(req.body.productType)
   values.push(req.body.code)
