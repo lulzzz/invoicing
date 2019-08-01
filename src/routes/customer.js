@@ -80,7 +80,7 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
     else if (result.affectedRows === 0) {
       res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else res.redirect('/customers/' + nif) //TODO send updated customer
+    else res.redirect('/customers/' + nif)
   });
 })
 
