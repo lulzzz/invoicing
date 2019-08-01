@@ -2,7 +2,6 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
-const { check, validationResult } = require('express-validator');
 
 //Create a new customer
 router.post('/customers', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {

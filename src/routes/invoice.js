@@ -2,7 +2,6 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
-const { validationResult } = require('express-validator');
 const { getCustomerId, getNoInvoices, insertInvoice, assignProductsToInvoice, getProductId } = require('../db/databaseHelper');
 
 //Get all invoices
