@@ -5,12 +5,7 @@ const validation = require('../middleware/validation');
 const { validationResult } = require('express-validator');
 
 //Create a new user
-router.post('/company', validation.customerCompanyPostValidation, (req, res) => {
-  
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send(errors);
-  }
+router.post('/company', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {
 
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
     if (err) res.status(400).send(err);
@@ -41,14 +36,15 @@ router.get('/company', (req, res) => {
   var sql = "SELECT name, nif, address, postalCode, city, country FROM company LIMIT 1";
   connection.query(sql, function (err, result) {
     if (err) res.status(400).send(err);
-    else if (result.length === 0){
+    else if (result.length === 0) {
       res.status(404).send('No company found');
     }
     else res.send(result)
   });
 })
 
-router.patch('/company', (req, res) => {
+router.patch('/company', validation.companyPatchValidation, validation.validationResult, (req, res) => {
+
   const updates = Object.keys(req.body)
   //check if there are updates to do
   if (updates.length === 0) {
@@ -56,15 +52,15 @@ router.patch('/company', (req, res) => {
   }
   const allowedUpdates = ['name', 'nif', 'address', 'postalCode', 'city', 'country']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
-
+  // check if the updates are allowed
   if (!isValidOperation) {
     return res.status(400).send({ error: 'Invalid updates!' })
   }
-  //TODO if is valid operation, validate fields
+
   var sql = "UPDATE company SET ?";
   connection.query(sql, [req.body], function (err, result) {
-    if (err) res.status(400).send('Bad request')
-    else res.send(result)
+    if (err) res.status(400).send({ error: 'Bad request' })
+    else res.send(result) //TODO send updated company
   });
 })
 
