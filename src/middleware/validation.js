@@ -86,10 +86,31 @@ exports.productPostValidation = [
     .matches(/^(S|P|O|E|I){1}$/).withMessage("product type should be 'S', 'P', 'O', 'E' or 'I'"),
   body('code')
     .not().isEmpty().withMessage("product code should not be empty")
-    .exists().withMessage('product code field must exist'),
+    .exists().withMessage('product code field must exist')
+    .custom(value => !/\s/.test(value)).withMessage('No spaces are allowed in the product code'),
   body('description')
     .not().isEmpty().withMessage("product description should not be empty")
     .exists().withMessage('product description field must exist')
+]
+
+exports.productPatchValidation = [
+  body('productType')
+    .optional()
+    .not().isEmpty().withMessage("product type should not be empty")
+    .matches(/^(S|P|O|E|I){1}$/).withMessage("product type should be 'S', 'P', 'O', 'E' or 'I'"),
+  body('code')
+    .optional()
+    .not().isEmpty().withMessage("product code should not be empty")
+    .custom(value => !/\s/.test(value)).withMessage('No spaces are allowed in the product code'),
+  body('description')
+    .optional()
+    .not().isEmpty().withMessage("product description should not be empty")
+]
+
+exports.productCodeValidation = [
+  param('code')
+    .custom(value => !/\s/.test(value))
+    .withMessage('No spaces are allowed in the product code')
 ]
 
 exports.invoiceValidation = [
@@ -105,13 +126,31 @@ exports.invoiceValidation = [
   body('products')
     .not().isEmpty().withMessage("products should not be empty")
     .exists().withMessage('products field must exist')
-  //TODO validate rest of products
+  //TODO validate rest of productsF
+  // let arr = [
+  //   {
+  //     user_id:1,
+  //     hours:8
+  //   },
+  //   {
+  //     user_id:2,
+  //     hours:7
+  //   }
+  // ]
+
+  // You can put check like this:
+  // check("arr.*.user_id")  
+  //   .not()  
+  //   .isEmpty()
+  // check("arr.*.hours")  
+  //   .not()  
+  //   .isEmpty()
 ]
 
 exports.validationResult = (req, res, next) => {
   const errors = validationResult(req).errors;
   if (errors.length !== 0) {
-    return res.status(422).send({ error: errors[errors.length - 1].msg });
+    return res.status(422).send({ error: errors });
   }
   next()
 }
