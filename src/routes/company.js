@@ -54,14 +54,24 @@ router.patch('/company', validation.companyPatchValidation, validation.validatio
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
   // check if the updates are allowed
   if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' })
+    return res.status(400).send({ error: 'Field to update is invalid!' })
   }
 
-  var sql = "UPDATE company SET ?";
-  connection.query(sql, [req.body], function (err, result) {
-    if (err) res.status(400).send({ error: 'Bad request' })
-    else res.redirect('/company')
+  connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
+    if (err) res.status(400).send(err);
+    else if (result[0].rowCount === 0) {
+      res.status(404).send({error: 'No company created yet'});
+    }
+    else {
+      var sql = "UPDATE company SET ?";
+      connection.query(sql, [req.body], function (err, result) {
+        if (err) res.status(400).send({ error: 'Bad request' })
+        else res.redirect('/company')
+      });
+    }
   });
+
+
 })
 
 module.exports = router
