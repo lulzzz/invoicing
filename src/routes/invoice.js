@@ -22,7 +22,7 @@ router.get('/invoices', async (req, res) => {
 })
 
 //Create new invoice
-router.post('/invoices', validation.invoiceValidation, async (req, res) => {
+router.post('/invoices', validation.invoiceValidation, validation.validationResult, async (req, res) => {
 
     // {
     //     "type": "FS/FR",
@@ -38,11 +38,6 @@ router.post('/invoices', validation.invoiceValidation, async (req, res) => {
     //     ?????? "vencimento": ?????
     // }
     //TODO adicionar desconto????
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).send(errors);
-    }
 
     try {
         //TODO verificar que data de invoice é posterior à do último
