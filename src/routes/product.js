@@ -14,16 +14,16 @@ router.post('/products', validation.productPostValidation, validation.validation
   var sql = "INSERT INTO products (`productType`, `code`, `description`) VALUES (?)";
   connection.query(sql, [values], function (err, result) {
     if (err) {
-      switch (err.code) {
-        case 'ER_DUP_ENTRY':
-          return res.status(409).send('Product with code ' + req.body.code + ' already exists')
-          break;
-        default:
-          return res.status(400).send(err.sqlMessage)
-          break;
-      }
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).send('Product with code ' + req.body.code + ' already exists')
+      } else
+        return res.status(400).send(err.sqlMessage)
     }
-    else return res.redirect('/products/' + req.body.code) //TODO can't redirect here, should send 201
+    else connection.query("SELECT productType, code, description FROM products where idProduct = ?", result.insertId, function (err, result) {
+      if (err) {
+        return res.status(400).send(err.sqlMessage);
+      } else return res.status(201).send(result)
+    });
   });
 })
 
@@ -69,17 +69,22 @@ router.patch('/products/:code', validation.productPatchValidation, validation.va
     return res.status(400).send({ error: 'Field to update is invalid!' })
   }
 
-  var productCode = req.params.code
+  var oldProductCode = req.params.code
+  var newProductCode = req.body.code
   var sql = "UPDATE products SET ? where code = ?";
-  connection.query(sql, [req.body, productCode], function (err, result) {
-    console.log(result);
+  connection.query(sql, [req.body, oldProductCode], function (err, result) {
     if (err) {
-      return res.status(400).send(err.sqlMessage);
+      if(err.code === 'ER_DUP_ENTRY') return res.status(400).send({error: "A product with the code " + newProductCode + " already exists"});
+      else return res.status(400).send(err.sqlMessage);
     }
     else if (result.affectedRows === 0) {
-      return res.status(404).send("Product with code " + productCode + " could not be found.")
+      return res.status(404).send("Product with code " + oldProductCode + " could not be found.")
     }
-    else return res.redirect('/products/' + req.body.code)
+    else connection.query("SELECT productType, code, description FROM products where code = ?", newProductCode, function (err, result) {
+      if (err) {
+        return res.status(400).send(err.sqlMessage);
+      } else return res.status(201).send(result)
+    });
   });
 })
 

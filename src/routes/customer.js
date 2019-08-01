@@ -17,13 +17,10 @@ router.post('/customers', validation.customerCompanyPostValidation, validation.v
   var sql = "INSERT INTO customers (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
   connection.query(sql, [values], function (err, result) {
     if (err) {
-      switch (err.code) {
-        case 'ER_DUP_ENTRY':
-          return res.status(409).send('Customer with NIF ' + req.body.nif + ' already exists')
-          break;
-        default:
-          return res.status(400).send(err.sqlMessage)
-          break;
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).send('Customer with NIF ' + req.body.nif + ' already exists')
+      } else {
+        return res.status(400).send(err.sqlMessage)
       }
     }
     else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from customers where idCustomer = ?", result.insertId, function (err, result) {
@@ -79,7 +76,10 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
     else if (result.affectedRows === 0) {
       return res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else return res.redirect('/customers/' + nif)
+    else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from customers where nif = ?", nif, function (err, result) {
+      if (err) return res.status(400).send(err);
+      else return res.status(201).send(result[0])
+    })
   });
 })
 
