@@ -5,13 +5,7 @@ const validation = require('../middleware/validation');
 const { check, validationResult } = require('express-validator');
 
 //Create a new customer
-router.post('/customers', validation.customerCompanyPostValidation, (req, res) => {
-
-  // send validation result
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send(errors);
-  }
+router.post('/customers', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {
 
   var values = []
   values.push(req.body.name)
@@ -48,13 +42,7 @@ router.get('/customers', (req, res) => {
   });
 })
 
-router.get('/customers/:nif', validation.nifValidation, (req, res) => {
-
-  // send validation result
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send(errors);
-  }
+router.get('/customers/:nif', validation.nifValidation, validation.validationResult, (req, res) => {
 
   var nif = req.params.nif
   var sql = "SELECT name, nif, address, postalCode, city, country FROM customers WHERE nif = ?";
@@ -69,13 +57,7 @@ router.get('/customers/:nif', validation.nifValidation, (req, res) => {
   });
 })
 
-router.patch('/customers/:nif', validation.nifValidation, (req, res) => {
-
-  // send validation result
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send(errors);
-  }
+router.patch('/customers/:nif', validation.customerPatchValidation, validation.validationResult, (req, res) => {
 
   const updates = Object.keys(req.body)
   //check if there are updates to do
@@ -84,16 +66,16 @@ router.patch('/customers/:nif', validation.nifValidation, (req, res) => {
   }
   const allowedUpdates = ['name', 'nif', 'address', 'postalCode', 'city', 'country']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
-
+  // check if the updates are allowed
   if (!isValidOperation) {
     return res.status(400).send({ error: 'Invalid updates!' })
   }
-  //TODO if is valid operation, validate patch params
+
   var nif = req.params.nif
   var sql = "UPDATE customers SET ? where nif = ?";
   connection.query(sql, [req.body, nif], function (err, result) {
     if (err) {
-      res.status(400).send(err.sqlMessage);
+      res.status(400).send({ error: 'Bad request' });
     }
     else if (result.affectedRows === 0) {
       res.status(404).send("Customer with NIF " + nif + " could not be found.")
@@ -102,13 +84,8 @@ router.patch('/customers/:nif', validation.nifValidation, (req, res) => {
   });
 })
 
-router.delete('/customers/:nif', validation.nifValidation, (req, res) => {
+router.delete('/customers/:nif', validation.nifValidation, validation.validationResult, (req, res) => {
 
-  // send validation result
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send(errors);
-  }
   var nif = req.params.nif
   var sql = "DELETE FROM customers where nif = ?";
   connection.query(sql, [nif], function (err, result) {
