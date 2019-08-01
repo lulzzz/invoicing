@@ -2,9 +2,10 @@
   "name": "invoices-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "env-cmd -f ./config/dev.env nodemon src/index.js"
+    "start": "node src/server.js",
+    "dev": "env-cmd -f ./config/dev.env nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
