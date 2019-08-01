@@ -75,6 +75,10 @@ router.patch('/customers/:nif', validation.nifValidation, (req, res) => {
   }
 
   const updates = Object.keys(req.body)
+  //check if there are updates to do
+  if (updates.length === 0) {
+    return res.status(400).send({ error: 'Must provide parameters' })
+  }
   const allowedUpdates = ['name', 'nif', 'address', 'postalCode', 'city', 'country']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
