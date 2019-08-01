@@ -33,7 +33,10 @@ router.post('/customers', validation.customerCompanyPostValidation, (req, res) =
           break;
       }
     }
-    else res.status(201).send('Customer with NIF ' + nif + ' was created.')
+    else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from customers where idCustomer = ?", result.insertId, function (err, result) {
+      if (err) res.status(400).send(err);
+      else res.status(201).send(result[0])
+    })
   });
 })
 
