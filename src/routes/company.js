@@ -7,9 +7,9 @@ const validation = require('../middleware/validation');
 router.post('/company', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {
 
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
-    if (err) res.status(400).send(err);
+    if (err) return res.status(400).send(err);
     else if (result[0].rowCount === 1) {
-      res.status(403).send('Company already created')
+      return res.status(403).send('Company already created')
     } else {
       var values = []
       values.push(req.body.name)
@@ -20,11 +20,10 @@ router.post('/company', validation.customerCompanyPostValidation, validation.val
       values.push(req.body.country)
       var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
       connection.query(sql, [values], function (err, result) {
-        if (err) res.status(400).send(err);
-        // else res.status(201).send('Company with values {' + values + '} was created')
+        if (err) return res.status(400).send(err);
         else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from company where idCompany = ?", result.insertId, function (err, result) {
-          if (err) res.status(400).send(err);
-          else res.status(201).send(result[0])
+          if (err) return res.status(400).send(err);
+          else return res.status(201).send(result[0])
         })
       });
     }
@@ -34,11 +33,11 @@ router.post('/company', validation.customerCompanyPostValidation, validation.val
 router.get('/company', (req, res) => {
   var sql = "SELECT name, nif, address, postalCode, city, country FROM company LIMIT 1";
   connection.query(sql, function (err, result) {
-    if (err) res.status(400).send(err);
+    if (err) return res.status(400).send(err);
     else if (result.length === 0) {
-      res.status(404).send('No company found');
+      return res.status(404).send('No company found');
     }
-    else res.send(result)
+    else return res.send(result)
   });
 })
 
@@ -59,13 +58,13 @@ router.patch('/company', validation.companyPatchValidation, validation.validatio
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
     if (err) res.status(400).send(err);
     else if (result[0].rowCount === 0) {
-      res.status(404).send({error: 'No company created yet'});
+      return res.status(404).send({error: 'No company created yet'});
     }
     else {
       var sql = "UPDATE company SET ?";
       connection.query(sql, [req.body], function (err, result) {
-        if (err) res.status(400).send({ error: 'Bad request' })
-        else res.redirect('/company')
+        if (err) return res.status(400).send({ error: 'Bad request' })
+        else return res.redirect('/company')
       });
     }
   });

@@ -19,16 +19,16 @@ router.post('/customers', validation.customerCompanyPostValidation, validation.v
     if (err) {
       switch (err.code) {
         case 'ER_DUP_ENTRY':
-          res.status(409).send('Customer with NIF ' + req.body.nif + ' already exists')
+          return res.status(409).send('Customer with NIF ' + req.body.nif + ' already exists')
           break;
         default:
-          res.status(400).send(err.sqlMessage)
+          return res.status(400).send(err.sqlMessage)
           break;
       }
     }
     else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from customers where idCustomer = ?", result.insertId, function (err, result) {
-      if (err) res.status(400).send(err);
-      else res.status(201).send(result[0])
+      if (err) return res.status(400).send(err);
+      else return res.status(201).send(result[0])
     })
   });
 })
@@ -36,8 +36,8 @@ router.post('/customers', validation.customerCompanyPostValidation, validation.v
 router.get('/customers', (req, res) => {
   var sql = "SELECT name, nif, address, postalCode, city, country FROM customers";
   connection.query(sql, function (err, result) {
-    if (err) res.status(400).send(err);
-    else res.send(result)
+    if (err) return res.status(400).send(err);
+    else return res.send(result)
   });
 })
 
@@ -47,12 +47,12 @@ router.get('/customers/:nif', validation.nifValidation, validation.validationRes
   var sql = "SELECT name, nif, address, postalCode, city, country FROM customers WHERE nif = ?";
   connection.query(sql, nif, function (err, result) {
     if (err) {
-      res.status(400).send(err.sqlMessage);
+      return res.status(400).send(err.sqlMessage);
     }
     else if (result.length === 0) {
-      res.status(404).send("Customer with NIF " + nif + " could not be found.")
+      return res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else res.send(result)
+    else return res.send(result)
   });
 })
 
@@ -67,19 +67,19 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
   // check if the updates are allowed
   if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' })
+    return res.status(400).send({ error: 'Field to update is invalid!' })
   }
 
   var nif = req.params.nif
   var sql = "UPDATE customers SET ? where nif = ?";
   connection.query(sql, [req.body, nif], function (err, result) {
     if (err) {
-      res.status(400).send({ error: 'Bad request' });
+      return res.status(400).send({ error: 'Bad request' });
     }
     else if (result.affectedRows === 0) {
-      res.status(404).send("Customer with NIF " + nif + " could not be found.")
+      return res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else res.redirect('/customers/' + nif)
+    else return res.redirect('/customers/' + nif)
   });
 })
 
@@ -89,12 +89,12 @@ router.delete('/customers/:nif', validation.nifValidation, validation.validation
   var sql = "DELETE FROM customers where nif = ?";
   connection.query(sql, [nif], function (err, result) {
     if (err) {
-      res.status(400).send(err.sqlMessage);
+      return res.status(400).send(err.sqlMessage);
     }
     else if (result.affectedRows === 0) {
-      res.status(404).send("Customer with NIF " + nif + " could not be found.")
+      return res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else res.send('Customer with NIF ' + nif + ' was deleted.') //TODO send deleted customer
+    else return res.send('Customer with NIF ' + nif + ' was deleted.') //TODO send deleted customer
   });
 })
 

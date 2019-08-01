@@ -2,16 +2,9 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
-const { validationResult } = require('express-validator');
 
 //Create a new product
-router.post('/products', validation.productPostValidation, (req, res) => {
-
-  // Finds the validation errors in this request and wraps them in an object with handy functions
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).send(errors);
-  }
+router.post('/products', validation.productPostValidation, validation.validationResult, (req, res) => {
 
   var values = []
   values.push(req.body.productType)
@@ -23,16 +16,15 @@ router.post('/products', validation.productPostValidation, (req, res) => {
     if (err) {
       switch (err.code) {
         case 'ER_DUP_ENTRY':
-          res.status(409).send('Product with code ' + req.body.code + ' already exists')
+          return res.status(409).send('Product with code ' + req.body.code + ' already exists')
           break;
         default:
-          res.status(400).send(err.sqlMessage)
+          return res.status(400).send(err.sqlMessage)
           break;
       }
     }
-    else res.status(201).send('Product with code ' + req.body.code + ' was created.')
+    else return res.redirect('/products/' + req.body.code) //TODO can't redirect here, should send 201
   });
-
 })
 
 // Get all products
@@ -40,61 +32,70 @@ router.get('/products', (req, res) => {
   var sql = "SELECT productType, code, description FROM products";
   connection.query(sql, function (err, result) {
     if (err) {
-      res.status(400).send(err.sqlMessage);
-    } else res.send(result)
+      return res.status(400).send(err.sqlMessage);
+    } else return res.send(result)
   });
 })
 
 //Get specific product
-router.get('/products/:code', (req, res) => {
+router.get('/products/:code', validation.productCodeValidation, validation.validationResult, (req, res) => {
+
   var productCode = req.params.code
   var sql = "SELECT productType, code, description FROM products where code = ?";
   connection.query(sql, productCode, function (err, result) {
     if (err) {
-      res.status(400).send(err.sqlMessage);
+      return res.status(400).send({ error: err.sqlMessage });
     }
     else if (result.length === 0) {
-      res.status(404).send("Product with code " + productCode + " could not be found.")
+      return res.status(404).send({ error: "Product with code " + productCode + " could not be found." })
     }
-    else res.send(result)
+    else return res.send(result)
   });
 })
 
 //Update Specific product
-router.patch('/products/:code', (req, res) => {
+router.patch('/products/:code', validation.productPatchValidation, validation.validationResult, (req, res) => {
+
+  //TODO validate body
   const updates = Object.keys(req.body)
+  //check if there are updates to do
+  if (updates.length === 0) {
+    return res.status(400).send({ error: 'Must provide parameters' })
+  }
   const allowedUpdates = ['productType', 'code', 'description']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' })
+    return res.status(400).send({ error: 'Field to update is invalid!' })
   }
 
   var productCode = req.params.code
   var sql = "UPDATE products SET ? where code = ?";
   connection.query(sql, [req.body, productCode], function (err, result) {
+    console.log(result);
     if (err) {
-      res.status(400).send(err.sqlMessage);
+      return res.status(400).send(err.sqlMessage);
     }
-    else if (result.length === 0) {
-      res.status(404).send("Product with code " + productCode + " could not be found.")
+    else if (result.affectedRows === 0) {
+      return res.status(404).send("Product with code " + productCode + " could not be found.")
     }
-    else res.send('Product with code ' + productCode + ' was updated.')
+    else return res.redirect('/products/' + req.body.code)
   });
 })
 
 //Delete specific product
-router.delete('/products/:code', (req, res) => {
+router.delete('/products/:code', validation.productCodeValidation, validation.validationResult, (req, res) => {
+
   var productCode = req.params.code
   var sql = "DELETE FROM products where code = ?";
   connection.query(sql, productCode, function (err, result) {
     if (err) {
-      res.status(400).send(err);
+      return res.status(400).send(err);
     }
-    else if (result.length === 0) {
-      res.status(404).send("Product with code " + productCode + " could not be found.")
+    else if (result.affectedRows === 0) {
+      return res.status(404).send("Product with code " + productCode + " could not be found.")
     }
-    else res.send('Product with code ' + nif + ' was deleted.')
+    else return res.send('Product with code ' + nif + ' was deleted.') //TODO send deleted product
   });
 })
 
