@@ -60,7 +60,7 @@ router.patch('/company', validation.companyPatchValidation, validation.validatio
   var sql = "UPDATE company SET ?";
   connection.query(sql, [req.body], function (err, result) {
     if (err) res.status(400).send({ error: 'Bad request' })
-    else res.send(result) //TODO send updated company
+    else res.redirect('/company')
   });
 })
 
