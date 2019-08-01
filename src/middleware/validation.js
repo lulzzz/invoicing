@@ -106,3 +106,11 @@ exports.invoiceValidation = [
     .not().isEmpty().withMessage("products should not be empty")
     .exists().withMessage('products field must exist')
 ]
+
+exports.validationResult = (req, res, next) => {
+  const errors = validationResult(req).errors;
+  if (errors.length !== 0) {
+    return res.status(422).send({ error: errors[errors.length - 1].msg });
+  }
+  next()
+}
