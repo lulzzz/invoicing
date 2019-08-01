@@ -80,7 +80,7 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
     else if (result.affectedRows === 0) {
       res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else res.send('Customer with NIF ' + nif + ' was updated.')
+    else res.redirect('/customers/' + nif) //TODO send updated customer
   });
 })
 
@@ -95,7 +95,7 @@ router.delete('/customers/:nif', validation.nifValidation, validation.validation
     else if (result.affectedRows === 0) {
       res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else res.send('Customer with NIF ' + nif + ' was deleted.')
+    else res.send('Customer with NIF ' + nif + ' was deleted.') //TODO send deleted customer
   });
 })
 
