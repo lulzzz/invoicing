@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+
+
+<body style="margin: 32px !important">
+
+  <div class="container" style="margin: auto auto 20px auto">
+    <div class="row">
+      <div class="col border border-primary">
+        <h3>{{company.name}}</h3>
+        <p>{{company.nif}}</p>
+        <p>{{company.address}}, {{company.postalCode}} {{company.city}}</p>
+      </div>
+      <div class="col-sm-3"></div>
+      <div class="col-sm-3"></div>
+    </div>
+  </div>
+
+  <div class="container" style="margin: auto auto 20px auto">
+    <div class="row">
+      <div class="col-sm-3"></div>
+      <div class="col-sm-3"></div>
+      <div class="col border border-primary" style="text-align: right;">
+        <h3>{{customer.name}}</h3>
+        <p>{{customer.nif}}</p>
+        <p>{{customer.address}}, {{customer.postalCode}} {{customer.city}}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="margin: auto auto 20px auto">
+    <div class="row">
+      <div class="col border border-primary">
+        <h3>Fatura {{reference}}</h3>
+        <p>Data: {{date}}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="margin: auto auto 20px auto">
+    <div class="row">
+      <div class="col border border-primary">
+        <table class="table table-borderless">
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Descrição</th>
+              <th scope="col" style="text-align: right">Preço Unit.</th>
+              <th scope="col" style="text-align: right">Quantidade</th>
+              <th scope="col" style="text-align: right">IVA</th>
+              <th scope="col" style="text-align: right">Total Líquido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each products}}
+            <tr>
+              <td>{{this.code}}</td>
+              <td>{{this.description}}</td>
+              <td style="text-align: right">{{this.unitPrice}}</td>
+              <td style="text-align: right">{{this.quantity}}</td>
+              <td style="text-align: right">{{this.tax}}%</td>
+              <td style="text-align: right">{{math this.unitPrice "*" this.quantity}}€</td>
+            </tr>
+            {{/each}}
+            {{!-- <tr>
+              <td>cod2</td>
+              <td>htfbdndvy</td>
+              <td style="text-align: right">5 €</td>
+              <td style="text-align: right">1</td>
+              <td style="text-align: right">23%</td>
+              <td style="text-align: right">5 € * 1</td>
+            </tr>
+            <tr>
+              <td>cod2</td>
+              <td>htfbdndvy</td>
+              <td style="text-align: right">10 €</td>
+              <td style="text-align: right">1</td>
+              <td style="text-align: right">0%</td>
+              <td style="text-align: right">10 € * 1</td>
+            </tr> --}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="margin: auto auto 20px auto">
+    <div class="row">
+      <div class="col-sm-6 border border-primary">
+        <h3>Impostos</h3>
+        <table class="table table-sm table-borderless">
+          <thead>
+            <tr>
+              <th scope="col">Imposto</th>
+              <th scope="col" style="text-align: right">Incidência</th>
+              <th scope="col" style="text-align: right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>23%</td>
+              <td style="text-align: right">12 €</td>
+              <td style="text-align: right">2,76 €</td>
+            </tr>
+            <tr>
+              <td>Isento</td>
+              <td style="text-align: right">10 €</td>
+              <td style="text-align: right">0 €</td>
+            </tr>
+        </table>
+      </div>
+
+      <div class="col-sm-2"></div>
+
+      <div class="col-sm-4 border border-primary">
+        <h3>Sumário</h3>
+        <table class="table table-sm table-borderless">
+          <tbody>
+            <tr>
+              <td>Soma</td>
+              <td style="text-align: right">22 €</td>
+            </tr>
+            <tr>
+              <td>S/IVA</td>
+              <td style="text-align: right">22 €</td>
+            </tr>
+            <tr>
+              <td>IVA</td>
+              <td style="text-align: right">2,76 €</td>
+            </tr>
+        </table>
+
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="margin-bottom: 5%">
+    <div class="row">
+      <div class="col-sm-8"></div>
+      <div class="col-sm-4">
+        <table class="table" style="bottom: 0">
+          <tbody>
+            <tr>
+              <th>Total</th>
+              <td style="text-align: right">24,76 €</td>
+            </tr>
+          </tbody>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
