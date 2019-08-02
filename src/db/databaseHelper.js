@@ -7,12 +7,13 @@ var getProductId = (code) => {
             function (err, result) {
                 if (err)
                     reject(err);
-                else{
-                    if(result.length === 0){
-                        reject('Product with code ' + code + ' does not exist.')
-                        return
+                else {
+                    if (result.length === 0) {
+                        reject({ message: 'Product with code ' + code + ' does not exist.' })
                     }
-                    resolve(result[0].idProduct)
+                    else {
+                        resolve(result[0].idProduct)
+                    }
                 }
             });
     })
@@ -37,7 +38,7 @@ module.exports = {
                 if (err)
                     reject(err)
                 else if (result.length === 0) {
-                    reject({ status: 404, message: 'Customer with nif ' + customerNIF + ' not found'})
+                    reject({ status: 404, message: 'Customer with nif ' + customerNIF + ' not found' })
                 }
                 else
                     resolve(result[0].idCustomer);
@@ -82,5 +83,51 @@ module.exports = {
             });
         });
 
+    },
+
+    getInvoiceDetails: async (ref, cb) => {
+        var values = {}
+
+        var productsQuery = "SELECT products.code, products.description, invoices_products.unitPrice, invoices_products.quantity, invoices_products.tax "
+            + "FROM invoices inner join invoices_products "
+            + "on invoices.idInvoice = invoices_products.idinvoice "
+            + "inner join products on invoices_products.idProduct = products.idProduct "
+            + "WHERE invoices.reference = ?;"
+    
+        var customerQuery = "SELECT customers.name, customers.nif, customers.address, customers.postalCode, customers.city "
+            + "FROM invoices inner join customers "
+            + "on invoices.FK_idCustomer = customers.idCustomer "
+            + "WHERE invoices.reference = ?;"
+    
+        var companyQuery = "SELECT name, nif, address, postalCode, city, country from company"
+    
+        var invoiceQuery = 'SELECT reference, createdAt FROM invoices where reference = ?'
+    
+        connection.query(invoiceQuery, ref, function (err, result) {
+            if (err) throw new Error(err);
+            else {
+                values.reference = result[0].reference
+                values.createdAt = result[0].createdAt
+                connection.query(companyQuery, function (err, result) {
+                    if (err) throw new Error(err);
+                    else {
+                        values.company = JSON.parse(JSON.stringify(result))
+                        connection.query(customerQuery, ref, function (err, result) {
+                            if (err) throw new Error(err);
+                            else {
+                                values.customer = JSON.parse(JSON.stringify(result))
+                                connection.query(productsQuery, ref, function (err, result) {
+                                    if (err) throw new Error(err);
+                                    else {
+                                        values.products = JSON.parse(JSON.stringify(result))
+                                        cb(values)
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        })
     }
 }
