@@ -102,7 +102,7 @@ const run = async (data) => {
         await page.setContent(content);
         await page.emulateMedia('print')
         const pdf = await page.pdf({
-            path: 'mypdf.pdf',
+            //path: 'mypdf.pdf',
             format: 'A4',
             printBackground: true
         })
