@@ -55,10 +55,7 @@ router.get('/products/:code', validation.productCodeValidation, validation.valid
 
 //Update Specific product
 router.patch('/products/:code', validation.productPatchValidation, validation.validationResult, (req, res) => {
-
-  //TODO validate body
   const updates = Object.keys(req.body)
-  //check if there are updates to do
   if (updates.length === 0) {
     return res.status(400).send({ error: 'Must provide parameters' })
   }
@@ -74,7 +71,7 @@ router.patch('/products/:code', validation.productPatchValidation, validation.va
   var sql = "UPDATE products SET ? where code = ?";
   connection.query(sql, [req.body, oldProductCode], function (err, result) {
     if (err) {
-      if(err.code === 'ER_DUP_ENTRY') return res.status(400).send({error: "A product with the code " + newProductCode + " already exists"});
+      if (err.code === 'ER_DUP_ENTRY') return res.status(400).send({ error: "A product with the code " + newProductCode + " already exists" });
       else return res.status(400).send(err.sqlMessage);
     }
     else if (result.affectedRows === 0) {
