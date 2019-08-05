@@ -1,48 +1,5 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs')
-// const data = {
-// 	"reference": "FR 2019/31",
-// 	"date": 2019-08-02,
-// 	"company": {
-// 		"name": "ANIECA",
-// 		"nif": 123123123,
-// 		"address": "rua da anieca",
-// 		"postalCode": "1223-123",
-// 		"city": "Lisboa",
-// 		"country": "PT"
-// 	},
-// 	"customer": {
-// 		"name": "cliente",
-// 		"nif": 234234234,
-// 		"address": "rua do cliente 1",
-// 		"postalCode": "1567-827",
-// 		"city": "Lisboa",
-// 		"country": "PT"
-// 	},
-// 	"products": [
-// 		{
-// 			"code": "ExA",
-// 			"description": "Exame tipo A",
-// 			"unitPrice": 3.50,
-// 			"quantity": 2,
-// 			"tax": 23
-// 		},
-// 		{
-// 			"code": "ExB",
-// 			"description": "Exame tipo B",
-// 			"unitPrice": 5.00,
-// 			"quantity": 1,
-// 			"tax": 23
-// 		},
-// 		{
-// 			"code": "ExC",
-// 			"description": "Exame tipo C",
-// 			"unitPrice": 10.00,
-// 			"quantity": 1,
-// 			"tax": 0
-// 		}
-// 	]
-// }
 
 const hbs = require('handlebars');
 const path = require('path');
@@ -107,8 +64,7 @@ const run = async (data) => {
             printBackground: true
         })
 
-        console.log('done');
-        // await browser.close()
+        await browser.close()
         return pdf
     } catch (error) {
         // console.log(error);
