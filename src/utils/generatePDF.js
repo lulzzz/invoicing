@@ -28,7 +28,7 @@ const formatData = (data) => {
         element.unitPrice = element.unitPrice.toFixed(2)
         element.quantity = element.quantity.toFixed(2)
         element.tax = element.tax.toFixed(2)
-        element.liquidTotal = element.liquidTotal.toFixed(2)
+        element.liquidTotal = element.iliquidTotal.toFixed(2)
     });
     
     data.taxes.forEach(element => {
