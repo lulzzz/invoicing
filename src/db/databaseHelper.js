@@ -19,6 +19,10 @@ var getProductId = (code) => {
     })
 }
 
+const round = (num) => {
+    return Math.round(num * 1e2) / 1e2
+}
+
 module.exports = {
     getNoInvoices: () => {
         return new Promise((resolve, reject) => {
@@ -34,7 +38,7 @@ module.exports = {
 
     getCustomerId: (customerNIF) => {
         return new Promise((resolve, reject) => {
-            connection.query('SELECT idCustomer FROM customers where nif = ?', [customerNIF], function (err, result) {
+            connection.query('SELECT idCustomer FROM customers WHERE nif = ?', [customerNIF], function (err, result) {
                 if (err)
                     reject(err)
                 else if (result.length === 0) {
@@ -85,42 +89,88 @@ module.exports = {
 
     },
 
-    getInvoiceDetails: async (ref, cb) => {
+    getDetailedInvoiceInfo: (ref, cb) => {
+        module.exports.getInvoiceInfo(ref, (err, values) => {
+            if (err) cb(err, undefined)
+            else {
+                values.products.forEach(element => {
+                    element.liquidTotal = element.unitPrice * element.quantity
+                });
+
+                // first, convert data into a Map with reduce
+                let taxes = values.products.reduce((prev, curr) => {
+                    let count = prev.get(curr.tax) || 0;
+                    prev.set(curr.tax, round(curr.quantity * curr.unitPrice + count));
+                    return prev;
+                }, new Map());
+
+                // then, map your counts object back to an array
+                let taxesObj = [...taxes].map(([tax, incidence]) => {
+                    var value = round(tax * incidence / 100)
+                    return { tax, incidence, value }
+                })
+
+                values.taxes = taxesObj
+
+                var summary = {
+                    sum: 0,
+                    noTax: 0,
+                    tax: 0,
+                    total: 0
+                }
+                
+                taxesObj.forEach(element => {
+                    summary.sum += element.incidence
+                    summary.noTax += element.incidence
+                    summary.tax += element.value
+                });
+
+                summary.total = summary.noTax + summary.tax
+                values.summary = summary
+                cb(undefined, values)
+            }
+        })
+    },
+
+    getInvoiceInfo: async (ref, cb) => {
         var values = {}
 
         var productsQuery = "SELECT products.code, products.description, invoices_products.unitPrice, invoices_products.quantity, invoices_products.tax "
-            + "FROM invoices inner join invoices_products "
-            + "on invoices.idInvoice = invoices_products.idinvoice "
-            + "inner join products on invoices_products.idProduct = products.idProduct "
+            + "FROM invoices INNER JOIN invoices_products "
+            + "ON invoices.idInvoice = invoices_products.idinvoice "
+            + "INNER JOIN products ON invoices_products.idProduct = products.idProduct "
             + "WHERE invoices.reference = ?;"
-    
+
         var customerQuery = "SELECT customers.name, customers.nif, customers.address, customers.postalCode, customers.city "
-            + "FROM invoices inner join customers "
-            + "on invoices.FK_idCustomer = customers.idCustomer "
+            + "FROM invoices INNER JOIN customers "
+            + "ON invoices.FK_idCustomer = customers.idCustomer "
             + "WHERE invoices.reference = ?;"
-    
-        var companyQuery = "SELECT name, nif, address, postalCode, city, country from company"
-    
-        var invoiceQuery = 'SELECT reference, createdAt FROM invoices where reference = ?'
-    
+
+        var companyQuery = "SELECT name, nif, address, postalCode, city, country FROM company"
+
+        var invoiceQuery = 'SELECT reference, createdAt FROM invoices WHERE reference = ?'
+
         connection.query(invoiceQuery, ref, function (err, result) {
-            if (err) throw new Error(err);
+            if (err) cb(err, undefined)
+            else if (result.length === 0) {
+                cb('Reference not found', undefined)
+            }
             else {
                 values.reference = result[0].reference
                 values.createdAt = result[0].createdAt
-                connection.query(companyQuery, function (err, result) {
-                    if (err) throw new Error(err);
+                connection.query(companyQuery, function (err, companyResult) {
+                    if (err) cb(err, undefined)
                     else {
-                        values.company = JSON.parse(JSON.stringify(result))
-                        connection.query(customerQuery, ref, function (err, result) {
-                            if (err) throw new Error(err);
+                        values.company = JSON.parse(JSON.stringify(companyResult[0]))
+                        connection.query(customerQuery, ref, function (err, customerResult) {
+                            if (err) cb(err, undefined)
                             else {
-                                values.customer = JSON.parse(JSON.stringify(result))
-                                connection.query(productsQuery, ref, function (err, result) {
-                                    if (err) throw new Error(err);
+                                values.customer = JSON.parse(JSON.stringify(customerResult[0]))
+                                connection.query(productsQuery, ref, function (err, productsResult) {
+                                    if (err) cb(err, undefined)
                                     else {
-                                        values.products = JSON.parse(JSON.stringify(result))
-                                        cb(values)
+                                        values.products = JSON.parse(JSON.stringify(productsResult))
+                                        cb(undefined, values)
                                     }
                                 })
                             }
