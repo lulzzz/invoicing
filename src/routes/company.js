@@ -7,7 +7,7 @@ const validation = require('../middleware/validation');
 router.post('/company', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {
 
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
-    if (err) return res.status(400).send(err);
+    if (err) return res.status(400).send({ error: err.sqlMessage });
     else if (result[0].rowCount === 1) {
       return res.status(403).send('Company already created')
     } else {
@@ -20,9 +20,9 @@ router.post('/company', validation.customerCompanyPostValidation, validation.val
       values.push(req.body.country)
       var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
       connection.query(sql, [values], function (err, result) {
-        if (err) return res.status(400).send(err);
+        if (err) return res.status(400).send({ error: err.sqlMessage });
         else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from company where idCompany = ?", result.insertId, function (err, result) {
-          if (err) return res.status(400).send(err);
+          if (err) return res.status(400).send({ error: err.sqlMessage });
           else return res.status(201).send(result[0])
         })
       });
@@ -33,7 +33,7 @@ router.post('/company', validation.customerCompanyPostValidation, validation.val
 router.get('/company', (req, res) => {
   var sql = "SELECT name, nif, address, postalCode, city, country FROM company LIMIT 1";
   connection.query(sql, function (err, result) {
-    if (err) return res.status(400).send(err);
+    if (err) return res.status(400).send({ error: err.sqlMessage });
     else if (result.length === 0) {
       return res.status(404).send('No company found');
     }
@@ -56,9 +56,9 @@ router.patch('/company', validation.companyPatchValidation, validation.validatio
   }
 
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
-    if (err) res.status(400).send(err);
+    if (err) res.status(400).send({ error: err.sqlMessage });
     else if (result[0].rowCount === 0) {
-      return res.status(404).send({error: 'No company created yet'});
+      return res.status(404).send({ error: 'No company created yet' });
     }
     else {
       var sql = "UPDATE company SET ?";

@@ -7,18 +7,13 @@ const generatePDF = require('../utils/generatePDF');
 
 //Get all invoices
 router.get('/invoices', async (req, res) => {
-
-    try {
         var query = 'SELECT reference FROM invoices'
         // + 'inner join invoices_products on invoices.idInvoice = invoices_products.idinvoice '
         // + 'inner join products on invoices_products.idProduct = products.idProduct '
-        connection.query(query, (error, results, fields) => {
-            if (error) throw error
+        connection.query(query, function (error, results) {
+            if (error) res.status(400).send({ error: err.sqlMessage })
             res.send(results)
         })
-    } catch (error) {
-        res.status(400).send(error.message)
-    }
 })
 
 //Get invoices by reference
@@ -104,9 +99,9 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         res.status(201).send(resp.reference)
     } catch (error) {
         if (error.status === 404) {
-            res.status(404).send(error.message)
+            res.status(404).send({error: error.message})
         }
-        else res.status(400).send(error.message)
+        else res.status(400).send(error)
     }
 })
 

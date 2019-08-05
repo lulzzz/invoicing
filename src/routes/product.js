@@ -15,13 +15,13 @@ router.post('/products', validation.productPostValidation, validation.validation
   connection.query(sql, [values], function (err, result) {
     if (err) {
       if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(409).send('Product with code ' + req.body.code + ' already exists')
+        return res.status(409).send({ error: 'Product with code ' + req.body.code + ' already exists' })
       } else
-        return res.status(400).send(err.sqlMessage)
+        return res.status(400).send({ error: err.sqlMessage })
     }
     else connection.query("SELECT productType, code, description FROM products where idProduct = ?", result.insertId, function (err, result) {
       if (err) {
-        return res.status(400).send(err.sqlMessage);
+        return res.status(400).send({ error: err.sqlMessage });
       } else return res.status(201).send(result)
     });
   });
@@ -32,7 +32,7 @@ router.get('/products', (req, res) => {
   var sql = "SELECT productType, code, description FROM products";
   connection.query(sql, function (err, result) {
     if (err) {
-      return res.status(400).send(err.sqlMessage);
+      return res.status(400).send({ error: err.sqlMessage });
     } else return res.send(result)
   });
 })
@@ -72,14 +72,14 @@ router.patch('/products/:code', validation.productPatchValidation, validation.va
   connection.query(sql, [req.body, oldProductCode], function (err, result) {
     if (err) {
       if (err.code === 'ER_DUP_ENTRY') return res.status(400).send({ error: "A product with the code " + newProductCode + " already exists" });
-      else return res.status(400).send(err.sqlMessage);
+      else return res.status(400).send({ error: err.sqlMessage });
     }
     else if (result.affectedRows === 0) {
-      return res.status(404).send("Product with code " + oldProductCode + " could not be found.")
+      return res.status(404).send({ error: "Product with code " + oldProductCode + " could not be found." })
     }
     else connection.query("SELECT productType, code, description FROM products where code = ?", newProductCode, function (err, result) {
       if (err) {
-        return res.status(400).send(err.sqlMessage);
+        return res.status(400).send({ error: err.sqlMessage });
       } else return res.status(201).send(result)
     });
   });
@@ -92,10 +92,10 @@ router.delete('/products/:code', validation.productCodeValidation, validation.va
   var sql = "DELETE FROM products where code = ?";
   connection.query(sql, productCode, function (err, result) {
     if (err) {
-      return res.status(400).send(err);
+      return res.status(400).send({ error: err.sqlMessage });
     }
     else if (result.affectedRows === 0) {
-      return res.status(404).send("Product with code " + productCode + " could not be found.")
+      return res.status(404).send({ error: "Product with code " + productCode + " could not be found." })
     }
     else return res.send('Product with code ' + nif + ' was deleted.') //TODO send deleted product
   });

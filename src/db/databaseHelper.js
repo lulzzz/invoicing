@@ -6,10 +6,10 @@ var getProductId = (code) => {
         connection.query(sql, code,
             function (err, result) {
                 if (err)
-                    reject(err);
+                    reject(err.sqlMessage);
                 else {
                     if (result.length === 0) {
-                        reject({ message: 'Product with code ' + code + ' does not exist.' })
+                        reject({status: 404, message: 'Product with code ' + code + ' does not exist.' })
                     }
                     else {
                         resolve(result[0].idProduct)
@@ -28,7 +28,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             connection.query('SELECT COUNT(*) AS invoiceCount FROM invoices', function (err, result) {
                 if (err)
-                    reject(err)
+                    reject(err.sqlMessage)
                 else
                     resolve(result[0].invoiceCount)
 
@@ -40,7 +40,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             connection.query('SELECT idCustomer FROM customers WHERE nif = ?', [customerNIF], function (err, result) {
                 if (err)
-                    reject(err)
+                    reject(err.sqlMessage)
                 else if (result.length === 0) {
                     reject({ status: 404, message: 'Customer with nif ' + customerNIF + ' not found' })
                 }
@@ -57,7 +57,7 @@ module.exports = {
             connection.query(sql, [values],
                 function (err, result) {
                     if (err)
-                        reject(err);
+                        reject(err.sqlMessage);
                     else
                         resolve({ "idInvoice": result.insertId, reference })
                 });
@@ -81,7 +81,7 @@ module.exports = {
             let sql = "INSERT INTO invoices_products (idInvoice, idProduct, unitPrice, quantity, tax) VALUES ?"
             connection.query(sql, [values], function (err, result) {
                 if (err)
-                    reject(err);
+                    reject(err.sqlMessage);
                 else
                     resolve(result)
             });
@@ -118,7 +118,7 @@ module.exports = {
                     tax: 0,
                     total: 0
                 }
-                
+
                 taxesObj.forEach(element => {
                     summary.sum += element.incidence
                     summary.noTax += element.incidence
