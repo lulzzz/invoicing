@@ -90,45 +90,48 @@ module.exports = {
     },
 
     getDetailedInvoiceInfo: (ref, cb) => {
-        module.exports.getInvoiceInfo(ref, (err, values) => {
-            if (err) cb(err, undefined)
-            else {
-                values.products.forEach(element => {
-                    element.liquidTotal = element.unitPrice * element.quantity
-                });
+        return new Promise((resolve, reject) => {
+            module.exports.getInvoiceInfo(ref)
+                .then((values) => {
+                    values.products.forEach(element => {
+                        element.liquidTotal = element.unitPrice * element.quantity
+                    });
 
-                // first, convert data into a Map with reduce
-                let taxes = values.products.reduce((prev, curr) => {
-                    let count = prev.get(curr.tax) || 0;
-                    prev.set(curr.tax, round(curr.quantity * curr.unitPrice + count));
-                    return prev;
-                }, new Map());
+                    // first, convert data into a Map with reduce
+                    let taxes = values.products.reduce((prev, curr) => {
+                        let count = prev.get(curr.tax) || 0;
+                        prev.set(curr.tax, round(curr.quantity * curr.unitPrice + count));
+                        return prev;
+                    }, new Map());
 
-                // then, map your counts object back to an array
-                let taxesObj = [...taxes].map(([tax, incidence]) => {
-                    var value = round(tax * incidence / 100)
-                    return { tax, incidence, value }
+                    // then, map your counts object back to an array
+                    let taxesObj = [...taxes].map(([tax, incidence]) => {
+                        var value = round(tax * incidence / 100)
+                        return { tax, incidence, value }
+                    })
+
+                    values.taxes = taxesObj
+
+                    var summary = {
+                        sum: 0,
+                        noTax: 0,
+                        tax: 0,
+                        total: 0
+                    }
+
+                    taxesObj.forEach(element => {
+                        summary.sum += element.incidence
+                        summary.noTax += element.incidence
+                        summary.tax += element.value
+                    });
+
+                    summary.total = summary.noTax + summary.tax
+                    values.summary = summary
+                    resolve(values)
                 })
-
-                values.taxes = taxesObj
-
-                var summary = {
-                    sum: 0,
-                    noTax: 0,
-                    tax: 0,
-                    total: 0
-                }
-
-                taxesObj.forEach(element => {
-                    summary.sum += element.incidence
-                    summary.noTax += element.incidence
-                    summary.tax += element.value
-                });
-
-                summary.total = summary.noTax + summary.tax
-                values.summary = summary
-                cb(undefined, values)
-            }
+                .catch((error) => {
+                    reject(error)
+                })
         })
     },
 

@@ -7,40 +7,34 @@ const generatePDF = require('../utils/generatePDF');
 
 //Get all invoices
 router.get('/invoices', async (req, res) => {
-        var query = 'SELECT reference FROM invoices'
-        // + 'inner join invoices_products on invoices.idInvoice = invoices_products.idinvoice '
-        // + 'inner join products on invoices_products.idProduct = products.idProduct '
-        connection.query(query, function (error, results) {
-            if (error) res.status(400).send({ error: err.sqlMessage })
-            res.send(results)
-        })
+    var query = 'SELECT reference FROM invoices'
+    // + 'inner join invoices_products on invoices.idInvoice = invoices_products.idinvoice '
+    // + 'inner join products on invoices_products.idProduct = products.idProduct '
+    connection.query(query, function (error, results) {
+        if (error) res.status(400).send({ error: err.sqlMessage })
+        res.send(results)
+    })
 })
 
 //Get invoices by reference
 router.get('/invoices/:ref', async (req, res) => {
 
-    getInvoiceInfo(req.params.ref, async (err, values) => {
-        if (err) res.status(400).send(err)
-        else res.send(values)
+    getInvoiceInfo(req.params.ref).then((values) => {
+        res.send(values)
+    }).catch((error) => {
+        res.status(400).send({ error })
     })
-
 })
 
 //Get invoice pdf by reference
 router.get('/invoices/:ref/pdf', (req, res) => {
 
-    getDetailedInvoiceInfo(req.params.ref, async (err, values) => {
-        if (err) res.status(400).send(err)
-        else {
-            try {
-                const pdf = await generatePDF(values, res)
-                res.contentType("application/pdf");
-                res.send(pdf);
-            } catch (error) {
-                res.status(400).send(error.message)
-            }
-
-        }
+    getDetailedInvoiceInfo(req.params.ref).then(async (values) => {
+        const pdf = await generatePDF(values, res)
+        res.contentType("application/pdf");
+        res.send(pdf);
+    }).catch((error) => {
+        res.status(400).send({ error })
     })
 
 })
@@ -48,11 +42,10 @@ router.get('/invoices/:ref/pdf', (req, res) => {
 //Get detailed info from the invoice
 router.get('/invoices/:ref/info', (req, res) => {
 
-    getDetailedInvoiceInfo(req.params.ref, async (err, values) => {
-        if (err) res.status(400).send(err)
-        else {
-            res.send(values);
-        }
+    getDetailedInvoiceInfo(req.params.ref).then((values) => {
+        res.send(values)
+    }).catch((error) => {
+        res.status(400).send({ error })
     })
 })
 
@@ -82,6 +75,7 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         var date = req.body.date
 
         /////Create invoice reference/////
+        //TODO o que acontece quando ha erros?? falta um catch de promises
         /*TODO arranjar um sistema melhor para numerar os invoices.
         o que acontece quando há um novo ano? invoices devem começar do 0 para cada ano/serie*/
         var noInvoices = await getNoInvoices()
@@ -99,9 +93,9 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         res.status(201).send(resp.reference)
     } catch (error) {
         if (error.status === 404) {
-            res.status(404).send({error: error.message})
+            res.status(404).send({ error: error.message })
         }
-        else res.status(400).send(error)
+        else res.status(400).send({ error })
     }
 })
 
