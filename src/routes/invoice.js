@@ -4,6 +4,8 @@ const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 const { getCustomerId, getNoInvoices, insertInvoice, assignProductsToInvoice, getInvoiceInfo, getDetailedInvoiceInfo } = require('../db/databaseHelper');
 const generatePDF = require('../utils/generatePDF');
+const PDFMerge = require('pdf-merge');
+
 
 //Get all invoices
 router.get('/invoices', async (req, res) => {
@@ -31,7 +33,7 @@ router.get('/invoices/:ref/pdf', (req, res) => {
 
     getDetailedInvoiceInfo(req.params.ref).then(async (values) => {
         const pdf = await generatePDF(values, res)
-        res.contentType("application/pdf");
+        res.contentType("application/pdf"); // TODO continuar a enviar pdf ou enviar buffer??
         res.send(pdf);
     }).catch((error) => {
         res.status(400).send({ error })
@@ -90,7 +92,14 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
 
         //TODO gerar pdf da fatura? Guardar pdf??
 
-        res.status(201).send(resp.reference)
+        getDetailedInvoiceInfo(resp.reference).then(async (values) => {
+            const pdf = await generatePDF(values, res)
+            //res.contentType("application/pdf");
+            res.send({reference: resp.reference, pdf: pdf});
+        }).catch((error) => {
+            res.status(400).send({ error })
+        })
+        // res.status(201).send(resp.reference)
     } catch (error) {
         if (error.status === 404) {
             res.status(404).send({ error: error.message })
