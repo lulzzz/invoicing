@@ -9,7 +9,7 @@ var getProductId = (code) => {
                     reject(err.sqlMessage);
                 else {
                     if (result.length === 0) {
-                        reject({status: 404, message: 'Product with code ' + code + ' does not exist.' })
+                        reject({ status: 404, message: 'Product with code ' + code + ' does not exist.' })
                     }
                     else {
                         resolve(result[0].idProduct)
@@ -132,7 +132,7 @@ module.exports = {
         })
     },
 
-    getInvoiceInfo: async (ref, cb) => {
+    getInvoiceInfo: async (ref) => {
         var values = {}
 
         var productsQuery = "SELECT products.code, products.description, invoices_products.unitPrice, invoices_products.quantity, invoices_products.tax "
@@ -150,34 +150,37 @@ module.exports = {
 
         var invoiceQuery = 'SELECT reference, createdAt FROM invoices WHERE reference = ?'
 
-        connection.query(invoiceQuery, ref, function (err, result) {
-            if (err) cb(err, undefined)
-            else if (result.length === 0) {
-                cb('Reference not found', undefined)
-            }
-            else {
-                values.reference = result[0].reference
-                values.createdAt = result[0].createdAt
-                connection.query(companyQuery, function (err, companyResult) {
-                    if (err) cb(err, undefined)
-                    else {
-                        values.company = JSON.parse(JSON.stringify(companyResult[0]))
-                        connection.query(customerQuery, ref, function (err, customerResult) {
-                            if (err) cb(err, undefined)
-                            else {
-                                values.customer = JSON.parse(JSON.stringify(customerResult[0]))
-                                connection.query(productsQuery, ref, function (err, productsResult) {
-                                    if (err) cb(err, undefined)
-                                    else {
-                                        values.products = JSON.parse(JSON.stringify(productsResult))
-                                        cb(undefined, values)
-                                    }
-                                })
-                            }
-                        })
-                    }
-                })
-            }
+        return new Promise((resolve, reject) => {
+            connection.query(invoiceQuery, ref, function (err, result) {
+                if (err) reject(err.sqlMessage);
+                else if (result.length === 0) {
+                    reject('Reference not found');
+                }
+                else {
+                    values.reference = result[0].reference
+                    values.createdAt = result[0].createdAt
+                    connection.query(companyQuery, function (err, companyResult) {
+                        if (err) reject(err.sqlMessage);
+                        else {
+                            values.company = JSON.parse(JSON.stringify(companyResult[0]))
+                            connection.query(customerQuery, ref, function (err, customerResult) {
+                                if (err) reject(err.sqlMessage);
+                                else {
+                                    values.customer = JSON.parse(JSON.stringify(customerResult[0]))
+                                    connection.query(productsQuery, ref, function (err, productsResult) {
+                                        if (err) reject(err.sqlMessage);
+                                        else {
+                                            values.products = JSON.parse(JSON.stringify(productsResult))
+                                            resolve(values)
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
         })
+
     }
 }
