@@ -90,7 +90,7 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         getDetailedInvoiceInfo(resp.reference).then(async (values) => {
             const pdf = await generatePDF(values, res)
             //res.contentType("application/pdf");
-            res.send({ reference: resp.reference, pdf: pdf });
+            res.send({ reference: resp.reference, pdf: pdf.toString('base64') });
         }).catch((error) => {
             res.status(400).send({ error })
         })
