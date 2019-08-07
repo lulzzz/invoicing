@@ -53,7 +53,7 @@ module.exports = {
     insertInvoice: (reference, invoiceType, date, customerId) => {
         return new Promise((resolve, reject) => {
             values = [reference, invoiceType, date, customerId]
-            let sql = "INSERT INTO invoices (reference, type, createdAt, FK_idCustomer) VALUES (?)"
+            let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer) VALUES (?)"
             connection.query(sql, [values],
                 function (err, result) {
                     if (err)
@@ -146,7 +146,7 @@ module.exports = {
 
         var customerQuery = "SELECT customers.name, customers.nif, customers.address, customers.postalCode, customers.city "
             + "FROM invoices INNER JOIN customers "
-            + "ON invoices.FK_idCustomer = customers.idCustomer "
+            + "ON invoices.idCustomer = customers.idCustomer "
             + "WHERE invoices.reference = ?;"
 
         var companyQuery = "SELECT name, nif, address, postalCode, city, country FROM company"
