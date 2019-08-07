@@ -4,8 +4,6 @@ const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 const { getCustomerId, getNoInvoices, insertInvoice, assignProductsToInvoice, getInvoiceInfo, getDetailedInvoiceInfo } = require('../db/databaseHelper');
 const generatePDF = require('../utils/generatePDF');
-const PDFMerge = require('pdf-merge');
-
 
 //Get all invoices
 router.get('/invoices', async (req, res) => {
@@ -95,7 +93,7 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         getDetailedInvoiceInfo(resp.reference).then(async (values) => {
             const pdf = await generatePDF(values, res)
             //res.contentType("application/pdf");
-            res.send({reference: resp.reference, pdf: pdf});
+            res.send({ reference: resp.reference, pdf: pdf });
         }).catch((error) => {
             res.status(400).send({ error })
         })
