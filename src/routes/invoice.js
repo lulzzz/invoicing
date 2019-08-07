@@ -31,7 +31,7 @@ router.get('/invoices/:ref/pdf', (req, res) => {
 
     getDetailedInvoiceInfo(req.params.ref).then(async (values) => {
         const pdf = await generatePDF(values, res)
-        res.contentType("application/pdf"); // TODO continuar a enviar pdf ou enviar buffer??
+        res.contentType("application/pdf");
         res.send(pdf);
     }).catch((error) => {
         res.status(400).send({ error })
@@ -75,7 +75,6 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         var date = req.body.date
 
         /////Create invoice reference/////
-        //TODO o que acontece quando ha erros?? falta um catch de promises
         /*TODO arranjar um sistema melhor para numerar os invoices.
         o que acontece quando há um novo ano? invoices devem começar do 0 para cada ano/serie*/
         var noInvoices = await getNoInvoices()
@@ -87,8 +86,6 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
 
         /////Assign products to the created invoice
         await assignProductsToInvoice(resp.idInvoice, products)
-
-        //TODO gerar pdf da fatura? Guardar pdf??
 
         getDetailedInvoiceInfo(resp.reference).then(async (values) => {
             const pdf = await generatePDF(values, res)
