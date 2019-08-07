@@ -86,7 +86,7 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         var resp = await insertInvoice(reference, invoiceType, date, customerId)
 
         /////Assign products to the created invoice
-        var productToInvoice = await assignProductsToInvoice(resp.idInvoice, products)
+        await assignProductsToInvoice(resp.idInvoice, products)
 
         //TODO gerar pdf da fatura? Guardar pdf??
 
@@ -97,7 +97,22 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
         }).catch((error) => {
             res.status(400).send({ error })
         })
-        // res.status(201).send(resp.reference)
+
+        // insert invoice with transaction
+        // createNewInvoice(reference, invoiceType, date, customerId, products)
+        // .then(async (values) => {
+
+        //     getDetailedInvoiceInfo(reference).then(async (values) => {
+        //         const pdf = await generatePDF(values, res)
+        //         //res.contentType("application/pdf");
+
+        //         res.send({ reference: reference, pdf: pdf });
+
+        //     })
+        // })
+        // .catch((error) => {
+        //     res.status(400).send({ error })
+        // })
     } catch (error) {
         if (error.status === 404) {
             res.status(404).send({ error: error.message })

@@ -89,6 +89,76 @@ module.exports = {
 
     },
 
+    //insert invoices in invoices and invoices_products using transactions
+    createNewInvoice: async (reference, invoiceType, date, customerId, products) => {
+        return new Promise((resolve, reject) => {
+
+            connection.getConnection(async (err, connection) => {
+                connection.beginTransaction(async (err) => {
+                    if (err) {//Transaction Error (Rollback and release connection)
+                        connection.rollback(() => {
+                            reject(err.sqlMessage);
+                            connection.release();
+                            //Failure
+                        });
+                    } else {
+
+                        values = [reference, invoiceType, date, customerId]
+                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer) VALUES (?)"
+                        connection.query(sql, [values], async (err, result) => {
+                            if (err) {          //Query Error (Rollback and release connection)
+                                connection.rollback(() => {
+                                    reject(err.sqlMessage);
+                                    connection.release();
+                                    //Failure
+                                });
+                            } else {
+                                let invoiceId = result.insertId
+                                var values = []
+                                for await (const product of products) {
+                                    let productId = await getProductId(product.code)
+                                    product.id = productId
+                                    let tmp = []
+                                    tmp.push(invoiceId)
+                                    tmp.push(productId)
+                                    tmp.push(product.unitPrice)
+                                    tmp.push(product.quantity)
+                                    tmp.push(product.tax)
+                                    values.push(tmp)
+                                }
+                                let sql = "INSERT INTO invoices_products (idInvoice, idProduct, unitPrice, quantity, tax) VALUES ?"
+                                connection.query(sql, [values], function (err, result) {
+                                    if (err) {
+                                        connection.rollback(function () {
+                                            reject(err.sqlMessage);
+                                            connection.release();
+                                            //Failure
+                                        });
+                                    }
+                                    else {
+                                        connection.commit(function(err) {
+                                            if (err) {
+                                                connection.rollback(function() {
+                                                    connection.release();
+                                                    //Failure
+                                                });
+                                            } else {
+                                                connection.release();
+                                                resolve(result)
+                                                //Success
+                                            }
+                                        });
+                                        
+                                    }
+                                });
+                            }
+                        });
+                    }
+                })
+            })
+        })
+    },
+
     getDetailedInvoiceInfo: (ref, cb) => {
         return new Promise((resolve, reject) => {
             module.exports.getInvoiceInfo(ref)
