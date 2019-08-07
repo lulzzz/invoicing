@@ -167,7 +167,7 @@ exports.invoiceValidation = [
   body('products.*.tax')
     .not().isEmpty().withMessage('product tax should not be empty')
     .exists().withMessage('product tax field must exist')
-    //.isInt({ min: 0 }).withMessage('tax should be a integer'),
+    .isInt({ min: 0 }).withMessage('tax should be a integer'),
 ]
 
 exports.validationResult = (req, res, next) => {
