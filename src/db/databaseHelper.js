@@ -27,6 +27,7 @@ module.exports = {
     getNoInvoices: () => {
         return new Promise((resolve, reject) => {
             connection.query('SELECT COUNT(*) AS invoiceCount FROM invoices', function (err, result) {
+                console.log(result);
                 if (err)
                     reject(err.sqlMessage)
                 else
@@ -92,7 +93,6 @@ module.exports = {
     //insert invoices in invoices and invoices_products using transactions
     createNewInvoice: async (reference, invoiceType, date, customerId, products) => {
         return new Promise((resolve, reject) => {
-
             connection.getConnection(async (err, connection) => {
                 connection.beginTransaction(async (err) => {
                     if (err) {//Transaction Error (Rollback and release connection)
@@ -102,7 +102,6 @@ module.exports = {
                             //Failure
                         });
                     } else {
-
                         values = [reference, invoiceType, date, customerId]
                         let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer) VALUES (?)"
                         connection.query(sql, [values], async (err, result) => {
@@ -136,11 +135,11 @@ module.exports = {
                                         });
                                     }
                                     else {
-                                        connection.commit(function(err) {
+                                        connection.commit(function (err) {
                                             if (err) {
-                                                connection.rollback(function() {
+                                                connection.rollback(function () {
                                                     connection.release();
-                                                    //Failure
+                                                    reject(err.sqlMessage);
                                                 });
                                             } else {
                                                 connection.release();
@@ -148,7 +147,6 @@ module.exports = {
                                                 //Success
                                             }
                                         });
-                                        
                                     }
                                 });
                             }

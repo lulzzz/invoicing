@@ -2,7 +2,7 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
-const { getCustomerId, getNoInvoices, insertInvoice, assignProductsToInvoice, getInvoiceInfo, getDetailedInvoiceInfo } = require('../db/databaseHelper');
+const { getCustomerId, getNoInvoices, createNewInvoice, getInvoiceInfo, getDetailedInvoiceInfo } = require('../db/databaseHelper');
 const generatePDF = require('../utils/generatePDF');
 
 //Get all invoices
@@ -11,7 +11,7 @@ router.get('/invoices', async (req, res) => {
     // + 'inner join invoices_products on invoices.idInvoice = invoices_products.idinvoice '
     // + 'inner join products on invoices_products.idProduct = products.idProduct '
     connection.query(query, function (error, results) {
-        if (error) res.status(400).send({ error: err.sqlMessage })
+        if (error) res.status(400).send({ error: error.sqlMessage })
         res.send(results)
     })
 })
@@ -82,34 +82,21 @@ router.post('/invoices', validation.invoiceValidation, validation.validationResu
 
         /////Get customerID and insert invoice in invoices table/////
         var customerId = await getCustomerId(customerNIF)
-        var resp = await insertInvoice(reference, invoiceType, date, customerId)
-
-        /////Assign products to the created invoice
-        await assignProductsToInvoice(resp.idInvoice, products)
-
-        getDetailedInvoiceInfo(resp.reference).then(async (values) => {
-            const pdf = await generatePDF(values, res)
-            //res.contentType("application/pdf");
-            res.send({ reference: resp.reference, pdf: pdf.toString('base64') });
-        }).catch((error) => {
-            res.status(400).send({ error })
-        })
 
         // insert invoice with transaction
-        // createNewInvoice(reference, invoiceType, date, customerId, products)
-        // .then(async (values) => {
+        createNewInvoice(reference, invoiceType, date, customerId, products)
+            .then(async (values) => {
 
-        //     getDetailedInvoiceInfo(reference).then(async (values) => {
-        //         const pdf = await generatePDF(values, res)
-        //         //res.contentType("application/pdf");
+                getDetailedInvoiceInfo(reference).then(async (values) => {
+                    const pdf = await generatePDF(values, res)
+                    //res.contentType("application/pdf");
+                    res.send({ reference: reference, pdf: pdf.toString('base64') });
 
-        //         res.send({ reference: reference, pdf: pdf });
-
-        //     })
-        // })
-        // .catch((error) => {
-        //     res.status(400).send({ error })
-        // })
+                })
+            })
+            .catch((error) => {
+                res.status(400).send({ error })
+            })
     } catch (error) {
         if (error.status === 404) {
             res.status(404).send({ error: error.message })
