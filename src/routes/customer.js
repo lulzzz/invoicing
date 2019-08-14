@@ -13,8 +13,9 @@ router.post('/customers', validation.customerCompanyPostValidation, validation.v
   values.push(req.body.postalCode)
   values.push(req.body.city)
   values.push(req.body.country)
+  values.push(req.body.permit || 0)
 
-  var sql = "INSERT INTO customers (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
+  var sql = "INSERT INTO customers (`name`, `nif`, `address`, `postalCode`, `city`, `country`, `permit`) VALUES (?)";
   connection.query(sql, [values], function (err, result) {
     if (err) {
       if (err.code === 'ER_DUP_ENTRY') {
@@ -23,7 +24,7 @@ router.post('/customers', validation.customerCompanyPostValidation, validation.v
         return res.status(400).send({ error: err.sqlMessage })
       }
     }
-    else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from customers where idCustomer = ?", result.insertId, function (err, result) {
+    else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country`, `permit` from customers where idCustomer = ?", result.insertId, function (err, result) {
       if (err) return res.status(400).send({ error: err.sqlMessage });
       else return res.status(201).send(result[0])
     })
@@ -31,7 +32,7 @@ router.post('/customers', validation.customerCompanyPostValidation, validation.v
 })
 
 router.get('/customers', (req, res) => {
-  var sql = "SELECT name, nif, address, postalCode, city, country FROM customers";
+  var sql = "SELECT name, nif, address, postalCode, city, country, permit FROM customers";
   connection.query(sql, function (err, result) {
     if (err) return res.status(400).send({ error: err.sqlMessage });
     else return res.send(result)
@@ -41,7 +42,7 @@ router.get('/customers', (req, res) => {
 router.get('/customers/:nif', validation.nifValidation, validation.validationResult, (req, res) => {
 
   var nif = req.params.nif
-  var sql = "SELECT name, nif, address, postalCode, city, country FROM customers WHERE nif = ?";
+  var sql = "SELECT name, nif, address, postalCode, city, country, permit FROM customers WHERE nif = ?";
   connection.query(sql, nif, function (err, result) {
     if (err) {
       return res.status(400).send({ error: err.sqlMessage });
@@ -60,7 +61,7 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
   if (updates.length === 0) {
     return res.status(400).send({ error: 'Must provide parameters' })
   }
-  const allowedUpdates = ['name', 'nif', 'address', 'postalCode', 'city', 'country']
+  const allowedUpdates = ['name', 'nif', 'address', 'postalCode', 'city', 'country', 'permit']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
   // check if the updates are allowed
   if (!isValidOperation) {
@@ -76,7 +77,7 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
     else if (result.affectedRows === 0) {
       return res.status(404).send({ error: "Customer with NIF " + nif + " could not be found." })
     }
-    else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from customers where nif = ?", nif, function (err, result) {
+    else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country`, `permit` from customers where nif = ?", nif, function (err, result) {
       if (err) return res.status(400).send({ error: err.sqlMessage });
       else return res.status(201).send(result[0])
     })
