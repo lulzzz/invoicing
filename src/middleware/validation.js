@@ -71,6 +71,7 @@ exports.customerPatchValidation = [
   body('country')
     .optional()
     .not().isEmpty().withMessage('country field must not be empty')
+    //TODO add validation permits
 ]
 
 exports.companyPatchValidation = [
@@ -167,7 +168,7 @@ exports.invoiceValidation = [
   body('products.*.tax')
     .not().isEmpty().withMessage('product tax should not be empty')
     .exists().withMessage('product tax field must exist')
-    .isInt({ min: 0 }).withMessage('tax should be a integer'),
+    .custom(uPrice => uPrice >= 0).withMessage('tax should be >= 0')
 ]
 
 exports.validationResult = (req, res, next) => {
