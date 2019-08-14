@@ -90,7 +90,7 @@ module.exports = {
     },
 
     //insert invoices in invoices and invoices_products using transactions
-    createNewInvoice: async (reference, invoiceType, date, customerId, products, payments) => {
+    createNewInvoice: async (reference, invoiceType, date, customerId, products, payments, header) => {
         return new Promise((resolve, reject) => {
             connection.getConnection(async (err, connection) => {
                 connection.beginTransaction(async (err) => {
@@ -101,8 +101,8 @@ module.exports = {
                             //Failure
                         });
                     } else {
-                        values = [reference, invoiceType, date, customerId]
-                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer) VALUES (?)"
+                        values = [reference, invoiceType, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email]
+                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email) VALUES (?)"
                         connection.query(sql, [values], async (err, result) => {
                             if (err) {          //Query Error (Rollback and release connection)
                                 connection.rollback(() => {
@@ -205,13 +205,15 @@ module.exports = {
 
                     var summary = {
                         sum: 0,
+                        //TODO Desconto
                         noTax: 0,
                         tax: 0,
                         total: 0
                     }
 
                     taxesObj.forEach(element => {
-                        // summary.sum += element.incidence
+                        summary.sum += element.incidence
+                        //TODO desconto
                         summary.noTax += element.incidence
                         summary.tax += element.value
                     });
@@ -242,7 +244,7 @@ module.exports = {
 
         var companyQuery = "SELECT shortName, longName, nif, address, postalCode, city, country, phone, email, fax FROM company"
 
-        var invoiceQuery = 'SELECT reference, createdAt FROM invoices WHERE reference = ?'
+        var invoiceQuery = 'SELECT reference, createdAt, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email FROM invoices WHERE reference = ?'
 
         var paymentQuery = "SELECT paymentMethod.method, paymentMethod.value "
             + "FROM paymentmethod INNER JOIN invoices "
@@ -258,6 +260,15 @@ module.exports = {
                 else {
                     values.reference = result[0].reference
                     values.createdAt = result[0].createdAt
+                    let header = {}
+                    header.name = result[0].header_name
+                    header.address = result[0].header_address
+                    header.postalCode = result[0].header_postalCode
+                    header.city = result[0].header_city
+                    header.phone = result[0].header_phone
+                    header.fax = result[0].header_fax
+                    header.email = result[0].header_email
+                    values.header = header
                     connection.query(companyQuery, function (err, companyResult) {
                         if (err) reject(err.sqlMessage);
                         else {

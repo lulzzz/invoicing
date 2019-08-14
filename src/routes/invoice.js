@@ -57,9 +57,9 @@ const createInvoice = (invoiceInfo) => {
             var customerNIF = invoiceInfo.customerNIF
             var products = invoiceInfo.products
             var payments = invoiceInfo.payments
+            var header = invoiceInfo.header
             let date = new Date().toLocaleDateString()
 
-            //TODO inserir header na fatura
             //TODO auto proposto
             
             /////Create invoice reference/////
@@ -71,7 +71,7 @@ const createInvoice = (invoiceInfo) => {
             /////Get customerID and insert invoice in invoices table/////
             var customerId = await getCustomerId(customerNIF)
             // insert invoice with transaction
-            await createNewInvoice(reference, invoiceType, date, customerId, products, payments)
+            await createNewInvoice(reference, invoiceType, date, customerId, products, payments, header)
             
             const values = await getDetailedInvoiceInfo(reference)
             const pdf = await generatePDF(values)

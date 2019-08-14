@@ -7,18 +7,6 @@ const path = require('path');
 const compile = async (templateName, data) => {
     const filePath = path.join(process.cwd(), 'src/templates', `${templateName}.hbs`)
     const html = await fs.readFileSync(filePath, 'utf-8')
-    hbs.registerHelper("math", function (lvalue, operator, rvalue, options) {
-        lvalue = parseFloat(lvalue);
-        rvalue = parseFloat(rvalue);
-
-        return {
-            "+": lvalue + rvalue,
-            "-": lvalue - rvalue,
-            "*": lvalue * rvalue,
-            "/": lvalue / rvalue,
-            "%": lvalue % rvalue
-        }[operator];
-    });
     return hbs.compile(html)(data);
 }
 
@@ -40,11 +28,12 @@ const formatData = (data) => {
         element.value = element.value.toFixed(2)
     });
 
-    // data.summary.sum = data.summary.sum.toFixed(2)
+    data.summary.sum = data.summary.sum.toFixed(2)
+    //TODO desconto
     data.summary.noTax = data.summary.noTax.toFixed(2)
     data.summary.tax = data.summary.tax.toFixed(2)
     data.summary.total = data.summary.total.toFixed(2)
-
+    //TODO if has permit !=0
     data.customer.permit = 'Alvará nº ' + data.customer.permit
 
     data.payments.forEach(element => {
