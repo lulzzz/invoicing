@@ -86,72 +86,6 @@ const createInvoice = (invoiceInfo) => {
 //Create new invoice
 router.post('/invoices', /*validation.invoiceValidation, validation.validationResult,*/ async (req, res) => {
 
-    // {
-    //     "header":{
-    //         "header_name":"asfsdf",
-    //         "header_address":"asdfsadf",
-    //         "header_cp":"sdfsdf",
-    //         "header_location":"sdfsdf",
-    //         "header_telephone1":"sfdf",
-    //         "header_email":"sdfsdf"
-    //   },
-    //   "invoice":[
-    //       {
-    //           "type": "FR",
-    //         "customerName":"Rui Branco",
-    //         "customerNIF": 502601655,
-    //         "products": [
-    //             {
-    //               "code": "139",
-    //               "unitPrice": 3.2,
-    //               "quantity": 1,
-    //               "tax": 23
-    //             },
-    //             {
-    //               "code": "2",
-    //               "unitPrice": "2",
-    //               "quantity": 2,
-    //               "tax": 23
-    //             }
-    //         ],
-    //         "payments":[
-    //             {
-    //                 "method":"Check - BCP",
-    //                 "value":"33"
-    //             },
-    //             {
-    //                 "method":"ATM",
-    //                 "value":"10"   
-    //             }
-    //         ]
-    //       },
-    //     {
-    //         "type": "FR",
-    //         "customerNIF": 502601655,
-    //         "products":[
-    //             {
-    //                 "code": "139",
-    //                 "unitPrice": 3.2,
-    //                 "quantity": 1,
-    //                 "tax": 23
-    //             },
-    //             {
-    //                 "code": "2",
-    //                 "unitPrice": "2",
-    //                 "quantity": 2,
-    //                 "tax": 23
-    //             }
-    //         ],
-    //         "payments":[
-    //             {
-    //                 "method":"ATM",
-    //                 "value":"10"   
-    //             }
-    //         ]
-    //     }
-    // ]
-    // }
-
     try {
         var invoices = req.body.invoice
         var references = []
@@ -162,7 +96,17 @@ router.post('/invoices', /*validation.invoiceValidation, validation.validationRe
             references.push(invoice.reference)
             pdfs.push(invoice.pdf)
         }
+        
         //TODO retornar erros de faturas que falham
+        // {
+        //     "references": [
+        //         0: "FR 2019/173",
+        //         1: "Erro",
+        //         2: "FR 2019/175"
+        //     ],
+        //     "pdf": agdsagdaa
+        // }
+
         var combinedPDF = combinePDF(pdfs)
         res.send({references, "pdf": combinedPDF.toString('base64')})
     } catch (error) {
