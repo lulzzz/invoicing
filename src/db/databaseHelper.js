@@ -27,7 +27,6 @@ module.exports = {
     getNoInvoices: () => {
         return new Promise((resolve, reject) => {
             connection.query('SELECT COUNT(*) AS invoiceCount FROM invoices', function (err, result) {
-                console.log(result);
                 if (err)
                     reject(err.sqlMessage)
                 else
@@ -91,7 +90,7 @@ module.exports = {
     },
 
     //insert invoices in invoices and invoices_products using transactions
-    createNewInvoice: async (reference, invoiceType, date, customerId, products) => {
+    createNewInvoice: async (reference, invoiceType, date, customerId, products, payments) => {
         return new Promise((resolve, reject) => {
             connection.getConnection(async (err, connection) => {
                 connection.beginTransaction(async (err) => {
@@ -114,16 +113,20 @@ module.exports = {
                             } else {
                                 let invoiceId = result.insertId
                                 var values = []
-                                for await (const product of products) {
-                                    let productId = await getProductId(product.code)
-                                    product.id = productId
-                                    let tmp = []
-                                    tmp.push(invoiceId)
-                                    tmp.push(productId)
-                                    tmp.push(product.unitPrice)
-                                    tmp.push(product.quantity)
-                                    tmp.push(product.tax)
-                                    values.push(tmp)
+                                try {
+                                    for await (const product of products) {
+                                        let productId = await getProductId(product.code)
+                                        product.id = productId
+                                        let tmp = []
+                                        tmp.push(invoiceId)
+                                        tmp.push(productId)
+                                        tmp.push(product.unitPrice)
+                                        tmp.push(product.quantity)
+                                        tmp.push(product.tax)
+                                        values.push(tmp)
+                                    }
+                                } catch (error) {
+                                    reject(error)
                                 }
                                 let sql = "INSERT INTO invoices_products (idInvoice, idProduct, unitPrice, quantity, tax) VALUES ?"
                                 connection.query(sql, [values], function (err, result) {
@@ -135,18 +138,38 @@ module.exports = {
                                         });
                                     }
                                     else {
-                                        connection.commit(function (err) {
+                                        var valuesPayment = []
+                                        payments.forEach(p => {
+                                            let tmp = []
+                                            tmp.push(invoiceId)
+                                            tmp.push(p.method)
+                                            tmp.push(p.value)
+                                            valuesPayment.push(tmp)
+                                        });
+                                        let sql = "INSERT INTO paymentmethod (idInvoice, method, value) VALUES ?"
+                                        connection.query(sql, [valuesPayment], function (err, result) {
                                             if (err) {
                                                 connection.rollback(function () {
-                                                    connection.release();
                                                     reject(err.sqlMessage);
+                                                    connection.release();
+                                                    //Failure
                                                 });
-                                            } else {
-                                                connection.release();
-                                                resolve(result)
-                                                //Success
                                             }
-                                        });
+                                            else {
+                                                connection.commit(function (err) {
+                                                    if (err) {
+                                                        connection.rollback(function () {
+                                                            connection.release();
+                                                            reject(err.sqlMessage);
+                                                        });
+                                                    } else {
+                                                        connection.release();
+                                                        resolve(result)
+                                                        //Success
+                                                    }
+                                                });
+                                            }
+                                        })
                                     }
                                 });
                             }
@@ -188,7 +211,7 @@ module.exports = {
                     }
 
                     taxesObj.forEach(element => {
-                        summary.sum += element.incidence
+                        // summary.sum += element.incidence
                         summary.noTax += element.incidence
                         summary.tax += element.value
                     });
@@ -212,14 +235,19 @@ module.exports = {
             + "INNER JOIN products ON invoices_products.idProduct = products.idProduct "
             + "WHERE invoices.reference = ?;"
 
-        var customerQuery = "SELECT customers.name, customers.nif, customers.address, customers.postalCode, customers.city "
+        var customerQuery = "SELECT customers.name, customers.nif, customers.address, customers.postalCode, customers.city, customers.permit "
             + "FROM invoices INNER JOIN customers "
             + "ON invoices.idCustomer = customers.idCustomer "
             + "WHERE invoices.reference = ?;"
 
-        var companyQuery = "SELECT name, nif, address, postalCode, city, country FROM company"
+        var companyQuery = "SELECT shortName, longName, nif, address, postalCode, city, country, phone, email, fax FROM company"
 
         var invoiceQuery = 'SELECT reference, createdAt FROM invoices WHERE reference = ?'
+
+        var paymentQuery = "SELECT paymentMethod.method, paymentMethod.value "
+            + "FROM paymentmethod INNER JOIN invoices "
+            + "ON invoices.idInvoice = paymentMethod.idInvoice "
+            + "WHERE invoices.reference = ?;"
 
         return new Promise((resolve, reject) => {
             connection.query(invoiceQuery, ref, function (err, result) {
@@ -242,7 +270,14 @@ module.exports = {
                                         if (err) reject(err.sqlMessage);
                                         else {
                                             values.products = JSON.parse(JSON.stringify(productsResult))
-                                            resolve(values)
+
+                                            connection.query(paymentQuery, ref, function (err, paymentResult) {
+                                                if (err) reject(err.sqlMessage);
+                                                else {
+                                                    values.payments = JSON.parse(JSON.stringify(paymentResult))
+                                                    resolve(values)
+                                                }
+                                            })
                                         }
                                     })
                                 }

@@ -40,10 +40,16 @@ const formatData = (data) => {
         element.value = element.value.toFixed(2)
     });
 
-    data.summary.sum = data.summary.sum.toFixed(2)
+    // data.summary.sum = data.summary.sum.toFixed(2)
     data.summary.noTax = data.summary.noTax.toFixed(2)
     data.summary.tax = data.summary.tax.toFixed(2)
     data.summary.total = data.summary.total.toFixed(2)
+
+    data.customer.permit = 'Alvará nº ' + data.customer.permit
+
+    data.payments.forEach(element => {
+        element.value = element.value.toFixed(2)
+    })
 
     return data
 }

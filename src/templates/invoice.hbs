@@ -16,10 +16,23 @@
   <style>
     .container {
       margin: auto auto 30px auto;
-      padding: 16px;
+      border: 5px solid red;
     }
-    #company {
-      margin-top: 10%;
+
+    #company p {
+      font-size: 12px;
+    }
+
+
+    #colDadosFatura {
+      position: relative;
+    }
+
+    #rowDadosFatura {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      border: 5px solid blue;
     }
   </style>
 </head>
@@ -27,26 +40,46 @@
 
 <body>
 
-  <div class="container" id="company">
+  <div class="container">
     <div class="row">
-      <div class="col">
-        <h3>{{company.name}}</h3>
-        <p>{{company.nif}}</p>
-        <p>{{company.address}}, {{company.postalCode}} {{company.city}}</p>
+      <div class="col col-sm-2"></div>
+      <div class="col col-sm-6" id="company">
+        <h2>{{company.shortName}}</h2>
+        <h5>{{company.longName}}</h5>
+        <p>Contribuinte nº {{company.nif}}
+          <br>{{company.address}}<br>{{company.postalCode}} {{company.city}}
+          <br>Telef. nº {{company.phone}}
+          &emsp;
+          Fax nº {{company.fax}}
+          <br>Email: {{company.email}}
+        </p>
+        <h5>{{header.name}}</h5>
+        <p>{{header.address}}<br>{{header.postalCode}} {{header.city}}
+          <br>Telef. nº {{header.phone}}
+          &emsp;
+          Fax nº {{header.fax}}
+          <br>Email: {{header.email}}
+        </p>
       </div>
-      <div class="col-sm-3"></div>
-      <div class="col-sm-3"></div>
+      <div class="col col-sm-4" id="colDadosFatura">
+        <div class="row" id="rowDadosFatura">
+          <h3>Fatura {{reference}}</h3>
+          <p>Data: {{createdAt}}</p>
+        </div>
+
+      </div>
     </div>
   </div>
 
   <div class="container" id="costumer">
     <div class="row">
-      <div class="col-sm-3"></div>
-      <div class="col-sm-3"></div>
-      <div class="col" style="text-align: right;">
-        <h3>{{customer.name}}</h3>
-        <p>{{customer.nif}}</p>
-        <p>{{customer.address}}, {{customer.postalCode}} {{customer.city}}</p>
+      <div class="col col-sm-8">
+        <h5>{{customer.name}}
+          <br>{{customer.address}}<br>{{customer.postalCode}} {{customer.city}}</h5>
+      </div>
+      <div class="col col-sm-4">
+        <p>{{customer.permit}}
+          <br> Contribuinte nº {{customer.nif}}</p>
       </div>
     </div>
   </div>
@@ -54,16 +87,7 @@
   <div class="container">
     <div class="row">
       <div class="col">
-        <h3>Fatura {{reference}}</h3>
-        <p>Data: {{createdAt}}</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="row">
-      <div class="col">
-        <table class="table table-striped table-borderless">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th scope="col">Código</th>
@@ -93,7 +117,7 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-sm-6">
+      <div class="col col-sm-6">
         <h3>Impostos</h3>
         <table class="table table-sm table-borderless">
           <thead>
@@ -114,26 +138,24 @@
         </table>
       </div>
 
-      <div class="col-sm-2"></div>
+      <div class="col col-sm-2"></div>
 
-      <div class="col-sm-4">
+      <div class="col col-sm-4">
         <h3>Sumário</h3>
         <table class="table table-sm table-borderless">
           <tbody>
-            <tr>
+            {{!-- <tr>
               <td>Soma</td>
               <td style="text-align: right">{{summary.sum}}€</td>
-            </tr>
+            </tr> --}}
             <tr>
-              <td>S/IVA</td>
+              <td>Total sem IVA</td>
               <td style="text-align: right">{{summary.noTax}}€</td>
             </tr>
             <tr>
-              <td>IVA</td>
+              <td>Total de IVA</td>
               <td style="text-align: right">{{summary.tax}}€</td>
             </tr>
-        </table>
-
         </table>
       </div>
     </div>
@@ -141,8 +163,25 @@
 
   <div class="container" style="margin-bottom: 5%">
     <div class="row">
-      <div class="col-sm-8"></div>
-      <div class="col-sm-4">
+      <div class="col col-sm-4">
+        <table class="table table-sm table-borderless">
+          <thead>
+            <tr>
+              <th scope="col">Meio de Pagamento</th>
+              <th scope="col" style="text-align: right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each payments}}
+            <tr>
+              <td>{{this.method}}</td>
+              <td style="text-align: right">{{this.value}}€</td>
+            </tr>
+            {{/each}}
+        </table>
+      </div>
+      <div class="col col-sm-4"></div>
+      <div class="col col-sm-4">
         <table class="table" style="bottom: 0">
           <tbody>
             <tr>
