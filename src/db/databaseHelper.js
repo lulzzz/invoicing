@@ -114,7 +114,7 @@ module.exports = {
                                 let invoiceId = result.insertId
                                 var values = []
                                 try {
-                                    for await (const product of products) {
+                                    for (const product of products) {
                                         let productId = await getProductId(product.code)
                                         product.id = productId
                                         let tmp = []
