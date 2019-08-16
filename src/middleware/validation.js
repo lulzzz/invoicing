@@ -138,38 +138,48 @@ exports.productCodeValidation = [
 ]
 
 exports.invoiceValidation = [
-  body('type')
-    .not().isEmpty().withMessage('type should not be empty')
-    .exists().withMessage('type field must exist')
-    .matches(/^(FR)$/).withMessage("type should be 'FR'"),
-  body('customerNIF')
+  body('invoice.*.type')
+    .not().isEmpty()
+    .exists()
+    .matches(/^(FR)$/),
+  body('invoice.*.customerNIF')
     .not().isEmpty().withMessage('customerNIF should not be empty')
     .exists().withMessage('customerNIF field must exist')
     .isInt().withMessage('customerNIF must be a number')
     .matches(/^[0-9]{9}/).withMessage('customerNIF must have 9 digits')
     /* .custom(nif => validateNIF(nif)).withMessage('nif is invalid') */,
-  body('products')
+  body('invoice.*.products')
     .not().isEmpty().withMessage('products should not be empty')
     .exists().withMessage('products field must exist'),
   // products validation
-  body('products.*.code')
+  body('invoice.*.products.*.code')
     .not().isEmpty().withMessage('product code should not be empty')
     .exists().withMessage('product code field must exist')
     .custom(value => !/\s/.test(value)).withMessage('No spaces are allowed in the product code'),
-  body('products.*.unitPrice')
+  body('invoice.*.products.*.unitPrice')
     .not().isEmpty().withMessage('unit price should not be empty')
     .exists().withMessage('unit price field must exist')
     .isDecimal({ min: 0.0 }).withMessage('unit price should be a number')
     .custom(uPrice => uPrice >= 0).withMessage('unit price should be >= 0'),
-  body('products.*.quantity')
+  body('invoice.*.products.*.quantity')
     .not().isEmpty().withMessage('product quantity should not be empty')
     .exists().withMessage('product quantity field must exist')
     .isInt({ min: 1 }).withMessage('quantity should be a positive integer (> 1)'),
-  body('products.*.tax')
+  body('invoice.*.products.*.tax')
     .not().isEmpty().withMessage('product tax should not be empty')
     .exists().withMessage('product tax field must exist')
     .custom(uPrice => uPrice >= 0).withMessage('tax should be >= 0')
-]
+] //TODO validate rest of invoice body
+
+exports.invoiceValidationResult = (req, res, next) => {
+  const errors = validationResult(req).errors;
+  req.errors = []
+  if (errors.length !== 0) {
+    // req.errors.line = errors.param.match(/(?<=\[).+?(?=\])/)[0]
+    req.errors = [...new Set(errors.map(function(d){ return parseInt(d.param.match(/(?<=\[).+?(?=\])/)[0])}))];
+  }
+  next()
+}
 
 exports.validationResult = (req, res, next) => {
   const errors = validationResult(req).errors;

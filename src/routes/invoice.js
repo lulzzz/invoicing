@@ -57,25 +57,28 @@ const createInvoice = (invoiceInfo) => {
             var customerNIF = invoiceInfo.customerNIF
             var products = invoiceInfo.products
             var payments = invoiceInfo.payments
-            var header = invoiceInfo.header
+            var header = invoiceInfo.header //specific for exam centers info and number
             let date = new Date().toLocaleDateString()
 
             //TODO auto proposto
-            
+
             /////Create invoice reference/////
             /*TODO arranjar um sistema melhor para numerar os invoices.
-            o que acontece quando há um novo ano? invoices devem começar do 0 para cada ano/serie*/
+            o que acontece quando há um novo ano? invoices devem começar do 0 para cada ano/serie
+            SELECT count(*) FROM `invoice-app-test`.invoices where YEAR(createdAt) = 2019 AND idCompany = 1*/
             var noInvoices = await getNoInvoices()
-            var reference = invoiceType + ' ' + new Date(date).getFullYear() + '/' + (noInvoices + 1)
-            
+
+            //TODO adicionar numero do centro de exames à referência
+            var reference = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices + 1)
+
             /////Get customerID and insert invoice in invoices table/////
             var customerId = await getCustomerId(customerNIF)
             // insert invoice with transaction
             await createNewInvoice(reference, invoiceType, date, customerId, products, payments, header)
-            
+
             const values = await getDetailedInvoiceInfo(reference)
             const pdf = await generatePDF(values)
-            resolve({ reference, pdf: pdf});
+            resolve({ reference, pdf: pdf });
         } catch (error) {
             reject(error)
         }
@@ -84,19 +87,31 @@ const createInvoice = (invoiceInfo) => {
 }
 
 //Create new invoice
-router.post('/invoices', /*validation.invoiceValidation, validation.validationResult,*/ async (req, res) => {
+router.post('/invoices', validation.invoiceValidation, validation.invoiceValidationResult, async (req, res) => {
 
     try {
         var invoices = req.body.invoice
-        var references = []
+        var references = {}
         var pdfs = []
-        for (const info of invoices) {
-            info.header = req.body.header
-            var invoice = await createInvoice(info)
-            references.push(invoice.reference)
-            pdfs.push(invoice.pdf)
+        for (const [index, info] of invoices.entries()) {
+            // console.log(req.errors.length);
+            if (req.errors.includes(index)) {
+                references[index] = 'error'
+            } else {
+                info.header = req.body.header
+                await createInvoice(info).then((invoice) => {
+                    const i = index
+                    references[index] = invoice.reference
+                    pdfs.push(invoice.pdf)
+                })
+                    .catch((error) => {
+                        references[index] = error
+                    })
+            }
+
+
         }
-        
+
         //TODO retornar erros de faturas que falham
         // {
         //     "references": [
@@ -108,7 +123,7 @@ router.post('/invoices', /*validation.invoiceValidation, validation.validationRe
         // }
 
         var combinedPDF = combinePDF(pdfs)
-        res.send({references, "pdf": combinedPDF.toString('base64')})
+        res.send({ references, "pdf": combinedPDF.toString('base64') })
     } catch (error) {
         if (error.status === 404) {
             res.status(404).send({ error: error.message })
