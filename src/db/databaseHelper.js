@@ -24,9 +24,9 @@ const round = (num) => {
 }
 
 module.exports = {
-    getNoInvoices: () => {
+    getNoInvoices: (date, company) => {
         return new Promise((resolve, reject) => {
-            connection.query('SELECT COUNT(*) AS invoiceCount FROM invoices', function (err, result) {
+            connection.query('SELECT COUNT(*) AS invoiceCount FROM invoices where YEAR(createdAt) = ? AND header_number = ?', [date, company], function (err, result) {
                 if (err)
                     reject(err.sqlMessage)
                 else
@@ -101,8 +101,8 @@ module.exports = {
                             //Failure
                         });
                     } else {
-                        values = [reference, invoiceType, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email]
-                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email) VALUES (?)"
+                        values = [reference, invoiceType, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email, header.number]
+                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email, header_number) VALUES (?)"
                         connection.query(sql, [values], async (err, result) => {
                             if (err) {          //Query Error (Rollback and release connection)
                                 connection.rollback(() => {

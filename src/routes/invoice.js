@@ -63,12 +63,8 @@ const createInvoice = (invoiceInfo) => {
             //TODO auto proposto
 
             /////Create invoice reference/////
-            /*TODO arranjar um sistema melhor para numerar os invoices.
-            o que acontece quando há um novo ano? invoices devem começar do 0 para cada ano/serie
-            SELECT count(*) FROM `invoice-app-test`.invoices where YEAR(createdAt) = 2019 AND idCompany = 1*/
-            var noInvoices = await getNoInvoices()
+            var noInvoices = await getNoInvoices(date, header.number)
 
-            //TODO adicionar numero do centro de exames à referência
             var reference = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices + 1)
 
             /////Get customerID and insert invoice in invoices table/////
@@ -111,16 +107,6 @@ router.post('/invoices', validation.invoiceValidation, validation.invoiceValidat
 
 
         }
-
-        //TODO retornar erros de faturas que falham
-        // {
-        //     "references": [
-        //         0: "FR 2019/173",
-        //         1: "Erro",
-        //         2: "FR 2019/175"
-        //     ],
-        //     "pdf": agdsagdaa
-        // }
 
         var combinedPDF = combinePDF(pdfs)
         res.send({ references, "pdf": combinedPDF.toString('base64') })
