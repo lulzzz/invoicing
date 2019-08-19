@@ -1,6 +1,7 @@
 const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
+var builder = require('xmlbuilder');
 
 const round = (num) => {
     return Math.round(num * 1e2) / 1e2
@@ -11,33 +12,37 @@ router.get('/saft', (req, res) => {
     var month = req.query.month
 
     var SAFT = {
-        "Header": {
-            // TODO
-            "AuditFileVersion": "1.04_01",
-            "CompanyID": "",
-            "TaxRegistrationNumber": "",
-            "TaxAccountingBasis": "F",
-            "CompanyName": "",
-            "BusinessName": "",
-            "CompanyAddress": {
-                "AddressDetail": "",
-                "City": "",
-                "PostalCode": "",
-                "Country": ""
+        "AuditFile": {
+            "@xmlns": "urn:OECD:StandardAuditFile-Tax:PT_1.04_01",
+            "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "Header": {
+                // TODO
+                "AuditFileVersion": "1.04_01",
+                "CompanyID": "",
+                "TaxRegistrationNumber": "",
+                "TaxAccountingBasis": "F",
+                "CompanyName": "",
+                "BusinessName": "",
+                "CompanyAddress": {
+                    "AddressDetail": "",
+                    "City": "",
+                    "PostalCode": "",
+                    "Country": ""
+                },
+                "FiscalYear": "",
+                "StartDate": "",
+                "EndDate": "",
+                "CurrencyCode": "EUR",
+                "DateCreated": "",
+                "TaxEntity": "Global",
+                "ProductCompanyTaxID": "???KBZ???", //TODO KBZ?
+                "SoftwareCertificateNumber": "900", //TODO ???
+                "ProductID": "GCE 2010/VDAUDIT", //TODO ANIGEST?
+                "ProductVersion": "1.1", //TODO ??
             },
-            "FiscalYear": "",
-            "StartDate": "",
-            "EndDate": "",
-            "CurrencyCode": "EUR",
-            "DateCreated": "",
-            "TaxEntity": "Global",
-            "ProductCompanyTaxID": "???KBZ???", //TODO KBZ?
-            "SoftwareCertificateNumber": "????",
-            "ProductID": "???ANIGEST???", //TODO ANIGEST?
-            "ProductVersion": "????", //TODO ??
-        },
-        "MasterFiles": {},
-        "SourceDocuments": {}
+            "MasterFiles": {},
+            "SourceDocuments": {}
+        }
     }
 
     var customerQuery = 'SELECT DISTINCT `customers`.`idCustomer`, `customers`.`name`, `customers`.`nif`, `customers`.`address`, `customers`.`postalCode`, `customers`.`city`, `customers`.`country`'
@@ -56,7 +61,7 @@ router.get('/saft', (req, res) => {
     //     + 'inner join products on invoices_products.idProduct = products.idProduct '
     //     + 'WHERE ((YEAR(`invoices`.`createdAt`) = ?) AND (MONTH(`invoices`.`createdAt`) = ?))'
 
-    var invoicesQuery = "SELECT g.reference, g.createdAt, g.idCustomer,"
+    var invoicesQuery = "SELECT g.type, g.reference, g.createdAt, g.idCustomer,"
         + " CONCAT('[', GROUP_CONCAT( JSON_OBJECT('code', u.code, 'description', u.description, 'quantity', ug.quantity, 'unitPrice', ug.unitPrice, 'tax', ug.tax) ),']')"
         + " AS products FROM invoices g JOIN invoices_products ug"
         + " ON ug.idInvoice = g.idInvoice JOIN products u"
@@ -76,23 +81,21 @@ router.get('/saft', (req, res) => {
             console.log(err);
         else {
             var company = JSON.parse(JSON.stringify(companyResult[0]));
-            console.log(company);
 
-            SAFT.Header.CompanyID = company.nif
-            SAFT.Header.TaxRegistrationNumber = company.nif
-            SAFT.Header.CompanyName = company.shortName + " - " + company.longName
-            SAFT.Header.BusinessName = company.shortName + " - " + company.longName
-            SAFT.Header.CompanyAddress.AddressDetail = company.address
-            SAFT.Header.CompanyAddress.City = company.city
-            SAFT.Header.CompanyAddress.PostalCode = company.postalCode
-            SAFT.Header.CompanyAddress.Country = company.country
-
-            SAFT.Header.FiscalYear = year
+            SAFT.AuditFile.Header.CompanyID = company.nif
+            SAFT.AuditFile.Header.TaxRegistrationNumber = company.nif
+            SAFT.AuditFile.Header.CompanyName = (company.shortName + " - " + company.longName).slice(0,60)
+            SAFT.AuditFile.Header.BusinessName = (company.shortName + " - " + company.longName).slice(0,60)
+            SAFT.AuditFile.Header.CompanyAddress.AddressDetail = company.address
+            SAFT.AuditFile.Header.CompanyAddress.City = company.city
+            SAFT.AuditFile.Header.CompanyAddress.PostalCode = company.postalCode
+            SAFT.AuditFile.Header.CompanyAddress.Country = company.country
+            SAFT.AuditFile.Header.FiscalYear = year
             var lastDayOfMonth = new Date(year, month, 0).getDate();
-            SAFT.Header.StartDate = year + '-' + month + '-01'
-            SAFT.Header.EndDate = year + '-' + month + '-' + lastDayOfMonth
+            SAFT.AuditFile.Header.StartDate = year + '-' + ("0" + month).slice(-2) + '-01'
+            SAFT.AuditFile.Header.EndDate = year + '-' + ("0" + month).slice(-2) + '-' + lastDayOfMonth
 
-            SAFT.Header.DateCreated = new Date().toISOString().slice(0,10);
+            SAFT.AuditFile.Header.DateCreated = new Date().toISOString().slice(0, 10);
 
             connection.query(customerQuery, [year, month], function (err, customerResult) {
                 if (err)
@@ -120,7 +123,7 @@ router.get('/saft', (req, res) => {
                         Customer.push(tmp)
                     });
 
-                    SAFT.MasterFiles.Customer = (Customer)
+                    SAFT.AuditFile.MasterFiles.Customer = (Customer)
 
                     connection.query(productQuery, [year, month], function (err, productsResult) {
                         if (err)
@@ -138,7 +141,7 @@ router.get('/saft', (req, res) => {
                                 tmp.ProductNumberCode = element.code
                                 Product.push(tmp)
                             });
-                            SAFT.MasterFiles.Product = (Product)
+                            SAFT.AuditFile.MasterFiles.Product = (Product)
 
                             connection.query(taxQuery, [year, month], function (err, taxResult) {
                                 if (err)
@@ -158,11 +161,11 @@ router.get('/saft', (req, res) => {
                                         else {
                                             tmp.TaxCode = "NOR"
                                         }
-                                        tmp.description = "Continente"
+                                        tmp.Description = "Continente"
                                         tmp.TaxPercentage = element.tax
                                         TaxTable.TaxTableEntry.push(tmp)
                                     });
-                                    SAFT.MasterFiles.TaxTable = TaxTable
+                                    SAFT.AuditFile.MasterFiles.TaxTable = TaxTable
 
                                     connection.query(invoicesQuery, [year, month], function (err, invoicesResult) {
                                         if (err)
@@ -179,26 +182,26 @@ router.get('/saft', (req, res) => {
                                             for (const invoiceIterator of invoiceRows) {
                                                 let tmpInvoice = {}
                                                 tmpInvoice.InvoiceNo = invoiceIterator.reference
-                                                // TODO
-                                                // "DocumentStatus": {
-                                                //     "InvoiceStatus": "N",
-                                                //     "InvoiceStatusDate": "2018-12-11T12:16:52",
-                                                //     "SourceID": "TESTE",
-                                                //     "SourceBilling": "P"
-                                                //   },
-                                                //   "Hash": "O065zSBsJRSa0qY+OsylmbSSx3Fs6JBSO67b9atM7eba+8lSQ11Jv5JRGjoBx8PkUUnn0wt2OwaOebd33pJdeZq17aot5txdtl/4/C4b2faqm6WyCC74ObBrYp7A8AUwy1ANKvRpYLo14MsHpPUchioHH256LMa+njNRc74OtzA=",
-                                                //   "HashControl": "1",
-                                                //   "Period": "12",
-                                                //   "InvoiceDate": "2018-12-11",
-                                                //   "InvoiceType": "FR",
-                                                //   "SpecialRegimes": {
-                                                //     "SelfBillingIndicator": "0",
-                                                //     "CashVATSchemeIndicator": "0",
-                                                //     "ThirdPartiesBillingIndicator": "0"
-                                                //   },
-                                                //   "SourceID": "TESTE",
-                                                //   "SystemEntryDate": "2018-12-11T12:16:52",
+                                                tmpInvoice.ATCUD = '0'
+                                                tmpInvoice.DocumentStatus = {
+                                                    InvoiceStatus: "N",
+                                                    InvoiceStatusDate: "2018-12-10T11:38:03", //TODO Adicionar hora quando invoice é criado?
+                                                    SourceID: "TESTE", //TODO ???
+                                                    SourceBilling: "P"
+                                                }
+                                                tmpInvoice.Hash = "0" //TODO gerar hash
+                                                tmpInvoice.HashControl = "0" //TODO gerar hash
+                                                tmpInvoice.InvoiceDate = invoiceIterator.createdAt
+                                                tmpInvoice.InvoiceType = invoiceIterator.type
+                                                tmpInvoice.SpecialRegimes = {
+                                                    SelfBillingIndicator: "0",
+                                                    CashVATSchemeIndicator: "0",
+                                                    ThirdPartiesBillingIndicator: "0"
+                                                }
+                                                tmpInvoice.SourceID = "TESTE" //TODO ???
+                                                tmpInvoice.SystemEntryDate = "2018-12-10T11:38:03" //TODO Adicionar hora quando invoice é criado?
                                                 tmpInvoice.CustomerID = invoiceIterator.idCustomer
+
                                                 tmpInvoice.Line = []
                                                 let tmpTaxPayable = 0
                                                 let tmpNetTotal = 0
@@ -250,9 +253,12 @@ router.get('/saft', (req, res) => {
                                                 SalesInvoices.Invoice.push(tmpInvoice)
                                             }
                                             SalesInvoices.TotalCredit = round(tmpTotalCredit)
-                                            SAFT.SourceDocuments.SalesInvoices = SalesInvoices
+                                            SAFT.AuditFile.SourceDocuments.SalesInvoices = SalesInvoices
 
-                                            res.send(SAFT)
+                                            var xml = builder.create(SAFT, {encoding: 'UTF-8'}).end({ pretty: true});
+                                            
+                                            res.set('Content-Type', 'text/xml');
+                                            res.send(xml)
 
                                         }
                                     })
