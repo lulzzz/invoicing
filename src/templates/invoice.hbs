@@ -14,6 +14,25 @@
   <!-- Latest compiled JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <style>
+    html,
+    body {
+      height: 100%;
+      margin: auto;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .produtos {
+      flex: 1 0 auto;
+    }
+
+    .footer {
+      flex-shrink: 0;
+    }
+
     .container {
       margin: auto auto 30px auto;
     }
@@ -34,7 +53,7 @@
   <div class="container" id="company">
     <div class="row">
       <div class="col col-sm-2 text-center">
-        <img src="http://site.anieca.pt/img/logo_anieca_161116_2.png" class="img-fluid"> 
+        <img src="http://site.anieca.pt/img/logo_anieca_161116_2.png" class="img-fluid">
         {{!-- TODO servir imagem localmente --}}
 
       </div>
@@ -54,155 +73,154 @@
       <div class="col col-sm-1"></div>
 
 
-        <div class="col col-sm-4" style="text-align: right;">
-          <div class="row">
-            <div class="col border border-dark">
-              <h3>Fatura {{reference}}</h3>
-              <h5>Data: {{createdAt}}</h5>
-            </div>
+      <div class="col col-sm-4" style="text-align: right;">
+        <div class="row">
+          <div class="col border border-dark">
+            <h3>Fatura {{reference}}</h3>
+            <h5>Data: {{createdAt}}</h5>
           </div>
-          <br>
-          <div class="row align-items-end">
-            <div class="col">
-              <h5>{{header.name}}</h5>
-              <p>{{header.address}}<br>{{header.postalCode}} {{header.city}}
-                <br>Telef. nº {{header.phone}}
-                &emsp;
-                Fax nº {{header.fax}}
-                <br>Email: {{header.email}}
-              </p>
-            </div>
+        </div>
+        <br>
+        <div class="row align-items-end">
+          <div class="col">
+            <h5>{{header.name}}</h5>
+            <p>{{header.address}}<br>{{header.postalCode}} {{header.city}}
+              <br>Telef. nº {{header.phone}}
+              &emsp;
+              Fax nº {{header.fax}}
+              <br>Email: {{header.email}}
+            </p>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
 
-    <div class="container border" id="costumer">
-      <div class="row align-items-center">
-        <div class="col col-sm-8">
-          <h5>{{customer.name}}
-            <br>{{customer.address}}<br>{{customer.postalCode}} {{customer.city}}</h5>
-        </div>
-        <div class="col col-sm-4">
-          <p>{{customer.permit}}
-            <br> Contribuinte nº {{customer.nif}}</p>
-        </div>
+  <div class="container border" id="costumer">
+    <div class="row align-items-center">
+      <div class="col col-sm-8">
+        <h5>{{customer.name}}
+          <br>{{customer.address}}<br>{{customer.postalCode}} {{customer.city}}</h5>
+      </div>
+      <div class="col col-sm-4">
+        <p>{{customer.permit}}
+          <br> Contribuinte nº {{customer.nif}}</p>
       </div>
     </div>
+  </div>
 
+  <div class="container produtos">
+    <div class="row">
+      <div class="col border">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Descrição</th>
+              <th scope="col" style="text-align: right">Preço Unit.</th>
+              <th scope="col" style="text-align: right">Quantidade</th>
+              <th scope="col" style="text-align: right">IVA</th>
+              <th scope="col" style="text-align: right">Total Líquido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each products}}
+            <tr>
+              <td>{{this.code}}</td>
+              <td>{{this.description}}</td>
+              <td style="text-align: right">{{this.unitPrice}}€</td>
+              <td style="text-align: right">{{this.quantity}}</td>
+              <td style="text-align: right">{{this.tax}}%</td>
+              <td style="text-align: right">{{this.liquidTotal}}€</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
     <div class="container">
       <div class="row">
-        <div class="col border">
-          <table class="table table-striped">
+        <div class="col col-sm-5 border">
+          <table class="table table-sm">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Descrição</th>
-                <th scope="col" style="text-align: right">Preço Unit.</th>
-                <th scope="col" style="text-align: right">Quantidade</th>
-                <th scope="col" style="text-align: right">IVA</th>
-                <th scope="col" style="text-align: right">Total Líquido</th>
+                <th scope="col">Imposto</th>
+                <th scope="col" style="text-align: right">Incidência</th>
+                <th scope="col" style="text-align: right">Valor</th>
               </tr>
             </thead>
             <tbody>
-              {{#each products}}
+              {{#each taxes}}
               <tr>
-                <td>{{this.code}}</td>
-                <td>{{this.description}}</td>
-                <td style="text-align: right">{{this.unitPrice}}€</td>
-                <td style="text-align: right">{{this.quantity}}</td>
-                <td style="text-align: right">{{this.tax}}%</td>
-                <td style="text-align: right">{{this.liquidTotal}}€</td>
+                <td>{{this.tax}}</td>
+                <td style="text-align: right">{{this.incidence}}€</td>
+                <td style="text-align: right">{{this.value}}€</td>
               </tr>
               {{/each}}
-            </tbody>
           </table>
         </div>
+
+        <div class="col col-sm-2"></div>
+
+        <div class="col col-sm-5">
+          <h3>Sumário</h3>
+          <table class="table table-sm table-borderless">
+            <tbody>
+              <tr>
+                <td>Soma</td>
+                <td style="text-align: right">{{summary.sum}}€</td>
+              </tr>
+              {{!-- desconto --}}
+              <tr>
+                <td>Total sem IVA</td>
+                <td style="text-align: right">{{summary.noTax}}€</td>
+              </tr>
+              <tr>
+                <td>Total de IVA</td>
+                <td style="text-align: right">{{summary.tax}}€</td>
+              </tr>
+          </table>
+        </div>
+
       </div>
     </div>
 
-    <div class="footer fixed-bottom">
-
-      <div class="container">
-        <div class="row">
-          <div class="col col-sm-5 border">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th scope="col">Imposto</th>
-                  <th scope="col" style="text-align: right">Incidência</th>
-                  <th scope="col" style="text-align: right">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{#each taxes}}
-                <tr>
-                  <td>{{this.tax}}</td>
-                  <td style="text-align: right">{{this.incidence}}€</td>
-                  <td style="text-align: right">{{this.value}}€</td>
-                </tr>
-                {{/each}}
-            </table>
-          </div>
-
-          <div class="col col-sm-2"></div>
-
-          <div class="col col-sm-5">
-            <h3>Sumário</h3>
-            <table class="table table-sm table-borderless">
-              <tbody>
-                <tr>
-              <td>Soma</td>
-              <td style="text-align: right">{{summary.sum}}€</td>
-            </tr>
-            {{!-- desconto --}}
-                <tr>
-                  <td>Total sem IVA</td>
-                  <td style="text-align: right">{{summary.noTax}}€</td>
-                </tr>
-                <tr>
-                  <td>Total de IVA</td>
-                  <td style="text-align: right">{{summary.tax}}€</td>
-                </tr>
-            </table>
-          </div>
-
+    <div class="container" style="margin-bottom: 5%">
+      <div class="row">
+        <div class="col col-sm-5 border">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Meio de Pagamento</th>
+                <th scope="col" style="text-align: right">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each payments}}
+              <tr>
+                <td>{{this.method}}</td>
+                <td style="text-align: right">{{this.value}}€</td>
+              </tr>
+              {{/each}}
+          </table>
         </div>
-      </div>
-
-      <div class="container" style="margin-bottom: 5%">
-        <div class="row">
-          <div class="col col-sm-5 border">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th scope="col">Meio de Pagamento</th>
-                  <th scope="col" style="text-align: right">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{#each payments}}
-                <tr>
-                  <td>{{this.method}}</td>
-                  <td style="text-align: right">{{this.value}}€</td>
-                </tr>
-                {{/each}}
-            </table>
-          </div>
-          <div class="col col-sm-2"></div>
-          <div class="col col-sm-5">
-            <table class="table" style="bottom: 0">
-              <tbody>
-                <tr>
-                  <th>Total</th>
-                  <td style="text-align: right">{{summary.total}}€</td>
-                </tr>
-              </tbody>
-          </div>
+        <div class="col col-sm-2"></div>
+        <div class="col col-sm-5">
+          <table class="table" style="bottom: 0">
+            <tbody>
+              <tr>
+                <th>Total</th>
+                <td style="text-align: right">{{summary.total}}€</td>
+              </tr>
+            </tbody>
         </div>
       </div>
     </div>
+  </div>
 </body>
 
 </html>
