@@ -10,38 +10,38 @@ const round = (num) => {
 router.get('/saft', (req, res) => {
     var year = req.query.year
     var month = req.query.month
+    var lastDayOfMonth = new Date(year, month, 0).getDate(); //number of days of the current mont
 
     var SAFT = {
         "AuditFile": {
             "@xmlns": "urn:OECD:StandardAuditFile-Tax:PT_1.04_01",
             "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "Header": {
-                // TODO
-                "AuditFileVersion": "1.04_01",
-                "CompanyID": "",
-                "TaxRegistrationNumber": "",
-                "TaxAccountingBasis": "F",
-                "CompanyName": "",
-                "BusinessName": "",
-                "CompanyAddress": {
-                    "AddressDetail": "",
-                    "City": "",
-                    "PostalCode": "",
-                    "Country": ""
+            Header: {
+                AuditFileVersion: "1.04_01",
+                CompanyID: "", // filled below
+                TaxRegistrationNumber: "", // filled below
+                TaxAccountingBasis: "F",
+                CompanyName: "", // filled below
+                BusinessName: "", // filled below
+                CompanyAddress: {
+                    AddressDetail: "", // filled below
+                    City: "", // filled below
+                    PostalCode: "", // filled below
+                    Country: "" // filled below
                 },
-                "FiscalYear": "",
-                "StartDate": "",
-                "EndDate": "",
-                "CurrencyCode": "EUR",
-                "DateCreated": "",
-                "TaxEntity": "Global",
-                "ProductCompanyTaxID": "???KBZ???", //TODO KBZ?
-                "SoftwareCertificateNumber": "900", //TODO ???
-                "ProductID": "GCE 2010/VDAUDIT", //TODO ANIGEST?
-                "ProductVersion": "1.1", //TODO ??
+                FiscalYear: year,
+                StartDate: year + '-' + ("0" + month).slice(-2) + '-01',
+                EndDate: year + '-' + ("0" + month).slice(-2) + '-' + lastDayOfMonth,
+                CurrencyCode: "EUR",
+                DateCreated: new Date().toISOString().slice(0, 10),
+                TaxEntity: "Global",
+                ProductCompanyTaxID: "???KBZ???", //TODO KBZ?
+                SoftwareCertificateNumber: "900", //TODO ???
+                ProductID: "GCE 2010/VDAUDIT", //TODO ANIGEST?
+                ProductVersion: "1.1", //TODO ??
             },
-            "MasterFiles": {},
-            "SourceDocuments": {}
+            MasterFiles: {},
+            SourceDocuments: {}
         }
     }
 
@@ -84,18 +84,12 @@ router.get('/saft', (req, res) => {
 
             SAFT.AuditFile.Header.CompanyID = company.nif
             SAFT.AuditFile.Header.TaxRegistrationNumber = company.nif
-            SAFT.AuditFile.Header.CompanyName = (company.shortName + " - " + company.longName).slice(0,60)
-            SAFT.AuditFile.Header.BusinessName = (company.shortName + " - " + company.longName).slice(0,60)
+            SAFT.AuditFile.Header.CompanyName = (company.shortName + " - " + company.longName).slice(0, 60)
+            SAFT.AuditFile.Header.BusinessName = (company.shortName + " - " + company.longName).slice(0, 60)
             SAFT.AuditFile.Header.CompanyAddress.AddressDetail = company.address
             SAFT.AuditFile.Header.CompanyAddress.City = company.city
             SAFT.AuditFile.Header.CompanyAddress.PostalCode = company.postalCode
             SAFT.AuditFile.Header.CompanyAddress.Country = company.country
-            SAFT.AuditFile.Header.FiscalYear = year
-            var lastDayOfMonth = new Date(year, month, 0).getDate();
-            SAFT.AuditFile.Header.StartDate = year + '-' + ("0" + month).slice(-2) + '-01'
-            SAFT.AuditFile.Header.EndDate = year + '-' + ("0" + month).slice(-2) + '-' + lastDayOfMonth
-
-            SAFT.AuditFile.Header.DateCreated = new Date().toISOString().slice(0, 10);
 
             connection.query(customerQuery, [year, month], function (err, customerResult) {
                 if (err)
@@ -255,8 +249,8 @@ router.get('/saft', (req, res) => {
                                             SalesInvoices.TotalCredit = round(tmpTotalCredit)
                                             SAFT.AuditFile.SourceDocuments.SalesInvoices = SalesInvoices
 
-                                            var xml = builder.create(SAFT, {encoding: 'UTF-8'}).end({ pretty: true});
-                                            
+                                            var xml = builder.create(SAFT, { encoding: 'UTF-8' }).end({ pretty: true });
+
                                             res.set('Content-Type', 'text/xml');
                                             res.send(xml)
 
