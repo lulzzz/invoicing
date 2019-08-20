@@ -96,7 +96,6 @@ router.post('/invoices', validation.invoiceValidation, validation.invoiceValidat
             } else {
                 info.header = req.body.header
                 await createInvoice(info).then((invoice) => {
-                    const i = index
                     references[index] = invoice.reference
                     pdfs.push(invoice.pdf)
                 })
