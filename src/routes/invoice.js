@@ -108,7 +108,9 @@ router.post('/invoices', validation.invoiceValidation, validation.invoiceValidat
 
         }
 
-        var combinedPDF = combinePDF(pdfs)
+        var combinedPDF = ""
+        if (pdfs.length !== 0) // only if there is a valid invoice to create PDF
+            combinedPDF = combinePDF(pdfs)
         res.send({ references, "pdf": combinedPDF.toString('base64') })
     } catch (error) {
         if (error.status === 404) {
