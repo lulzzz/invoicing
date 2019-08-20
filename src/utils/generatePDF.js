@@ -18,12 +18,12 @@ const formatData = (data) => {
         element.tax = element.tax.toFixed(2)
         element.liquidTotal = element.liquidTotal.toFixed(2)
     });
-    
+
     data.taxes.forEach(element => {
-        if(element.tax === 0){
+        if (element.tax === 0) {
             element.tax = 'Isento'
         }
-        else {element.tax = 'IVA' + element.tax }
+        else { element.tax = 'IVA' + element.tax }
         element.incidence = element.incidence.toFixed(2)
         element.value = element.value.toFixed(2)
     });
@@ -34,13 +34,17 @@ const formatData = (data) => {
     data.summary.tax = data.summary.tax.toFixed(2)
     data.summary.total = data.summary.total.toFixed(2)
     //TODO if has permit !=0
-    data.customer.permit = 'Alvará nº ' + data.customer.permit
+    if (data.customer.permit === 0)
+        data.customer.permit = null
+    if (data.customer.permit) {
+        data.customer.permit = 'Alvará nº ' + data.customer.permit
+}
 
-    data.payments.forEach(element => {
-        element.value = element.value.toFixed(2)
-    })
+data.payments.forEach(element => {
+    element.value = element.value.toFixed(2)
+})
 
-    return data
+return data
 }
 
 const run = async (data) => {
