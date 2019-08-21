@@ -143,14 +143,21 @@ exports.invoiceValidation = [
     .not().isEmpty().withMessage('header should not be empty'),
   body('header.name')
     .not().isEmpty().withMessage('header name should not be empty'),
-    body('header.address')
+  body('header.address')
     .not().isEmpty().withMessage('header address should not be empty'),
-    body('header.postalCode')
+  body('header.postalCode')
     .not().isEmpty().withMessage('header postalCode should not be empty'),
-    body('header.city')
+  body('header.city')
     .not().isEmpty().withMessage('header city should not be empty'),
-    body('header.phone')
+  body('header.phone')
     .not().isEmpty().withMessage('header name should not be empty'),
+  body('header.fax')
+    .not().isEmpty().withMessage('header fax should not be empty'),
+  body('header.email')
+    .not().isEmpty().withMessage('header email should not be empty'),
+  body('header.number')
+    .not().isEmpty().withMessage('header number should not be empty'),
+
 
   // invoice validation
   body('invoice.*.type')
