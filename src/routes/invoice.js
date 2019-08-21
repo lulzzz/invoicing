@@ -66,6 +66,7 @@ const createInvoice = (invoiceInfo) => {
             // if costumer isn't found, self-proposed student. grab info from req body
             if (!customerId) {
                 let values = []
+                if (!invoiceInfo.customerName) { throw new Error("a customer name must be provided") }
                 values.push(invoiceInfo.customerName)
                 values.push(invoiceInfo.customerNIF)
                 values.push(invoiceInfo.customerAddress)
@@ -86,7 +87,7 @@ const createInvoice = (invoiceInfo) => {
 
             const values = await getDetailedInvoiceInfo(reference)
             const pdf = await generatePDF(values)
-            resolve({ reference, pdf: pdf });
+            resolve({ reference, pdf });
         } catch (error) {
             reject(error)
         }
