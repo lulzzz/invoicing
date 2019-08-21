@@ -58,8 +58,8 @@ const createInvoice = (invoiceInfo) => {
             var products = invoiceInfo.products
             var payments = invoiceInfo.payments
             var header = invoiceInfo.header //specific for exam centers info and number
-            let date = new Date().toLocaleDateString()
-
+            var date = new Date(); // Or the date you'd like converted.
+            isoDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
             /////Get customerID and insert invoice in invoices table/////
             var customerId = await getCustomerId(customerNIF).catch((error) => { return null })
 
