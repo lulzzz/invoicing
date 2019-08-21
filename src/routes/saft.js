@@ -105,7 +105,7 @@ router.get('/saft', (req, res) => {
                         tmp.AccountID = "Desconhecido"
                         tmp.CustomerTaxID = element.nif
                         tmp.CompanyName = element.name
-
+                        //TODO o que colocar no saf-t quando estes campos não existem?
                         let BillingAddress = {}
                         BillingAddress.AddressDetail = element.address
                         BillingAddress.City = element.city
@@ -130,7 +130,6 @@ router.get('/saft', (req, res) => {
                                 let tmp = {}
                                 tmp.ProductType = element.productType
                                 tmp.ProductCode = element.code
-                                tmp.ProductGroup = "Exames" //TODO Quais são os grupos de produtos?
                                 tmp.ProductDescription = element.description
                                 tmp.ProductNumberCode = element.code
                                 Product.push(tmp)
