@@ -33,7 +33,7 @@ router.get('/saft', (req, res) => {
                 StartDate: year + '-' + ("0" + month).slice(-2) + '-01',
                 EndDate: year + '-' + ("0" + month).slice(-2) + '-' + lastDayOfMonth,
                 CurrencyCode: "EUR",
-                DateCreated: new Date().toLocaleDateString(),
+                DateCreated: new Date().toISOString().slice(0, 10),
                 TaxEntity: "Global",
                 ProductCompanyTaxID: "???KBZ???", //TODO KBZ?
                 SoftwareCertificateNumber: "900", //TODO ???
@@ -174,7 +174,7 @@ router.get('/saft', (req, res) => {
 
                                             for (const invoiceIterator of invoiceRows) {
                                                 let invoiceDateTime = invoiceIterator.createdAt.replace(' ', 'T')
-                                                let invoiceDate =invoiceDateTime.split('T')[0]
+                                                let invoiceDate = invoiceDateTime.split('T')[0]
 
                                                 let tmpInvoice = {}
                                                 tmpInvoice.InvoiceNo = invoiceIterator.reference
