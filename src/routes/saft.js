@@ -33,7 +33,7 @@ router.get('/saft', (req, res) => {
                 StartDate: year + '-' + ("0" + month).slice(-2) + '-01',
                 EndDate: year + '-' + ("0" + month).slice(-2) + '-' + lastDayOfMonth,
                 CurrencyCode: "EUR",
-                DateCreated: new Date().toISOString().slice(0, 10),
+                DateCreated: new Date().toLocaleDateString(),
                 TaxEntity: "Global",
                 ProductCompanyTaxID: "???KBZ???", //TODO KBZ?
                 SoftwareCertificateNumber: "900", //TODO ???
@@ -105,12 +105,12 @@ router.get('/saft', (req, res) => {
                         tmp.AccountID = "Desconhecido"
                         tmp.CustomerTaxID = element.nif
                         tmp.CompanyName = element.name
-                        //TODO o que colocar no saf-t quando estes campos não existem?
+
                         let BillingAddress = {}
-                        BillingAddress.AddressDetail = element.address
-                        BillingAddress.City = element.city
-                        BillingAddress.PostalCode = element.postalCode
-                        BillingAddress.Country = element.country
+                        BillingAddress.AddressDetail = element.address || "Desconhecido"
+                        BillingAddress.City = element.city || "Desconhecido"
+                        BillingAddress.PostalCode = element.postalCode || "Desconhecido"
+                        BillingAddress.Country = element.country || "Desconhecido"
                         tmp.BillingAddress = BillingAddress
                         tmp.SelfBillingIndicator = "0"
 
@@ -173,18 +173,21 @@ router.get('/saft', (req, res) => {
                                             let tmpTotalCredit = 0
 
                                             for (const invoiceIterator of invoiceRows) {
+                                                let invoiceDateTime = invoiceIterator.createdAt.replace(' ', 'T')
+                                                let invoiceDate =invoiceDateTime.split('T')[0]
+
                                                 let tmpInvoice = {}
                                                 tmpInvoice.InvoiceNo = invoiceIterator.reference
                                                 tmpInvoice.ATCUD = '0'
                                                 tmpInvoice.DocumentStatus = {
                                                     InvoiceStatus: "N",
-                                                    InvoiceStatusDate: "2018-12-10T11:38:03", //TODO Adicionar hora quando invoice é criado?
+                                                    InvoiceStatusDate: invoiceDateTime,
                                                     SourceID: "TESTE", //TODO ???
                                                     SourceBilling: "P"
                                                 }
                                                 tmpInvoice.Hash = "0" //TODO gerar hash
                                                 tmpInvoice.HashControl = "0" //TODO gerar hash
-                                                tmpInvoice.InvoiceDate = invoiceIterator.createdAt
+                                                tmpInvoice.InvoiceDate = invoiceDate
                                                 tmpInvoice.InvoiceType = invoiceIterator.type
                                                 tmpInvoice.SpecialRegimes = {
                                                     SelfBillingIndicator: "0",
@@ -192,7 +195,7 @@ router.get('/saft', (req, res) => {
                                                     ThirdPartiesBillingIndicator: "0"
                                                 }
                                                 tmpInvoice.SourceID = "TESTE" //TODO ???
-                                                tmpInvoice.SystemEntryDate = "2018-12-10T11:38:03" //TODO Adicionar hora quando invoice é criado?
+                                                tmpInvoice.SystemEntryDate = invoiceDateTime
                                                 tmpInvoice.CustomerID = invoiceIterator.idCustomer
 
                                                 tmpInvoice.Line = []
@@ -208,7 +211,7 @@ router.get('/saft', (req, res) => {
                                                     tmpProduct.Quantity = productIterator.quantity
                                                     tmpProduct.UnitOfMeasure = "Unidade"
                                                     tmpProduct.UnitPrice = productIterator.unitPrice
-                                                    tmpProduct.TaxPointDate = invoiceIterator.createdAt
+                                                    tmpProduct.TaxPointDate = invoiceDate
                                                     tmpProduct.Description = productIterator.description
                                                     tmpProduct.CreditAmount = productIterator.unitPrice
                                                     if (productIterator.tax !== 0) {
