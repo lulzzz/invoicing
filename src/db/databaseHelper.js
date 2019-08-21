@@ -64,6 +64,20 @@ module.exports = {
         })
     },
 
+    insertCustomer: (values) => {
+        return new Promise((resolve, reject) => {
+            var sql = "INSERT INTO customers (`name`, `nif`, `address`, `postalCode`, `city`, `country`, `permit`) VALUES (?)";
+            connection.query(sql, [values], function (err, result) {
+                if (err) {
+                    reject(err.sqlMessage)
+                }
+                else {
+                    resolve(result.insertId)
+                }
+            })
+        })
+    },
+
     assignProductsToInvoice: async (invoiceId, products) => {
         var values = []
         for await (const product of products) {
