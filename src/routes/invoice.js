@@ -2,7 +2,7 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
-const { getCustomerId, getNoInvoices, createNewInvoice, getInvoiceInfo, getDetailedInvoiceInfo } = require('../db/databaseHelper');
+const { getCustomerId, getNoInvoices, createNewInvoice, getInvoiceInfo, getDetailedInvoiceInfo, insertCustomer } = require('../db/databaseHelper');
 const generatePDF = require('../utils/generatePDF');
 const combinePDF = require('../utils/combinePDF');
 
@@ -60,15 +60,27 @@ const createInvoice = (invoiceInfo) => {
             var header = invoiceInfo.header //specific for exam centers info and number
             let date = new Date().toLocaleDateString()
 
-            //TODO auto proposto
+            /////Get customerID and insert invoice in invoices table/////
+            var customerId = await getCustomerId(customerNIF).catch((error) => { return null })
+
+            // if costumer isn't found, self-proposed student. grab info from req body
+            if (!customerId) {
+                let values = []
+                values.push(invoiceInfo.customerName)
+                values.push(invoiceInfo.customerNIF)
+                values.push(invoiceInfo.customerAddress)
+                values.push(invoiceInfo.customerPostalCode)
+                values.push(invoiceInfo.customerCity)
+                values.push(invoiceInfo.customerCountry)
+                values.push(invoiceInfo.customerPermit || 999)
+                customerId = await insertCustomer(values)
+            }
 
             /////Create invoice reference/////
             var noInvoices = await getNoInvoices(date, header.number)
 
             var reference = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices + 1)
 
-            /////Get customerID and insert invoice in invoices table/////
-            var customerId = await getCustomerId(customerNIF)
             // insert invoice with transaction
             await createNewInvoice(reference, invoiceType, date, customerId, products, payments, header)
 
@@ -90,26 +102,28 @@ router.post('/invoices', validation.invoiceValidation, validation.invoiceValidat
         var references = {}
         var pdfs = []
         for (const [index, info] of invoices.entries()) {
-            // console.log(req.errors.length);
-            if (req.errors.includes(index)) {
-                references[index] = 'error'
+            let errors = req.errors.filter(errors => errors.index === index);
+            if (errors.length !== 0) {
+                references[index] = errors.map(e => e.message).join(", ")
             } else {
                 info.header = req.body.header
-                await createInvoice(info).then((invoice) => {
-                    references[index] = invoice.reference
-                    pdfs.push(invoice.pdf)
-                })
+                await createInvoice(info)
+                    .then((invoice) => {
+                        references[index] = invoice.reference
+                        pdfs.push(invoice.pdf)
+                    })
                     .catch((error) => {
-                        references[index] = error
+                        references[index] = error.message
                     })
             }
-
-
         }
 
         var combinedPDF = ""
         if (pdfs.length !== 0) // only if there is a valid invoice to create PDF
             combinedPDF = combinePDF(pdfs)
+        else {
+            res.status(400) // STATUS 400 IF NO PDF
+        }
         res.send({ references, "pdf": combinedPDF.toString('base64') })
     } catch (error) {
         if (error.status === 404) {
