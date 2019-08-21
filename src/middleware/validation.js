@@ -71,7 +71,7 @@ exports.customerPatchValidation = [
   body('country')
     .optional()
     .not().isEmpty().withMessage('country field must not be empty')
-    //TODO add validation permits
+  //TODO add validation permits
 ]
 
 exports.companyPatchValidation = [
@@ -138,6 +138,21 @@ exports.productCodeValidation = [
 ]
 
 exports.invoiceValidation = [
+  // header validation
+  body('header')
+    .not().isEmpty().withMessage('header should not be empty'),
+  body('header.name')
+    .not().isEmpty().withMessage('header name should not be empty'),
+    body('header.address')
+    .not().isEmpty().withMessage('header address should not be empty'),
+    body('header.postalCode')
+    .not().isEmpty().withMessage('header postalCode should not be empty'),
+    body('header.city')
+    .not().isEmpty().withMessage('header city should not be empty'),
+    body('header.phone')
+    .not().isEmpty().withMessage('header name should not be empty'),
+
+  // invoice validation
   body('invoice.*.type')
     .not().isEmpty()
     .exists()
@@ -168,15 +183,29 @@ exports.invoiceValidation = [
   body('invoice.*.products.*.tax')
     .not().isEmpty().withMessage('product tax should not be empty')
     .exists().withMessage('product tax field must exist')
-    .custom(uPrice => uPrice >= 0).withMessage('tax should be >= 0')
-] //TODO validate rest of invoice body
+    .isDecimal({ min: 0.0 }).withMessage('tax should be a number')
+    .custom(uPrice => uPrice >= 0).withMessage('tax should be >= 0'),
+  // payments validation
+  body('invoice.*.payments')
+    .not().isEmpty().withMessage('payments should not be empty'),
+  body('invoice.*.payments.*.method')
+    .not().isEmpty().withMessage('payment method should not be empty'),
+  body('invoice.*.payments.*.value')
+    .not().isEmpty().withMessage('value should not be empty')
+    .isDecimal().withMessage('value should be a number')
+    .custom(value => value >= 0).withMessage('unit price should be >= 0'),
+]
 
 exports.invoiceValidationResult = (req, res, next) => {
   const errors = validationResult(req).errors;
   req.errors = []
   if (errors.length !== 0) {
+    let headerError = (errors.filter(errors => errors.param.match(/^header(.*)/)))
+    if (headerError.length !== 0) {
+      return res.status(422).send({ error: headerError });
+    }
     // req.errors.line = errors.param.match(/(?<=\[).+?(?=\])/)[0]
-    req.errors = [...new Set(errors.map(function(d){ return parseInt(d.param.match(/(?<=\[).+?(?=\])/)[0])}))];
+    req.errors = [...new Set(errors.map(function (d) { return { index: parseInt(d.param.match(/(?<=\[).+?(?=\])/)), message: d.msg } }))];
   }
   next()
 }
