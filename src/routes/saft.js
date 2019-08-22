@@ -185,8 +185,8 @@ router.get('/saft', (req, res) => {
                                                     SourceID: "TESTE", //TODO ???
                                                     SourceBilling: "P"
                                                 }
-                                                tmpInvoice.Hash = invoiceIterator.hash || 0//TODO gerar hash
-                                                tmpInvoice.HashControl = "0" //TODO gerar hash
+                                                tmpInvoice.Hash = invoiceIterator.hash || 0
+                                                tmpInvoice.HashControl = "0" //TODO gerar hashControl
                                                 tmpInvoice.InvoiceDate = invoiceDate
                                                 tmpInvoice.InvoiceType = invoiceIterator.type
                                                 tmpInvoice.SpecialRegimes = {
