@@ -61,7 +61,7 @@ router.get('/saft', (req, res) => {
     //     + 'inner join products on invoices_products.idProduct = products.idProduct '
     //     + 'WHERE ((YEAR(`invoices`.`createdAt`) = ?) AND (MONTH(`invoices`.`createdAt`) = ?))'
 
-    var invoicesQuery = "SELECT g.type, g.reference, g.createdAt, g.idCustomer,"
+    var invoicesQuery = "SELECT g.type, g.reference, g.createdAt, g.idCustomer, g.hash,"
         + " CONCAT('[', GROUP_CONCAT( JSON_OBJECT('code', u.code, 'description', u.description, 'quantity', ug.quantity, 'unitPrice', ug.unitPrice, 'tax', ug.tax) ),']')"
         + " AS products FROM invoices g JOIN invoices_products ug"
         + " ON ug.idInvoice = g.idInvoice JOIN products u"
@@ -159,7 +159,7 @@ router.get('/saft', (req, res) => {
                                         TaxTable.TaxTableEntry.push(tmp)
                                     });
                                     SAFT.AuditFile.MasterFiles.TaxTable = TaxTable
-
+                                    // TODO ordenar invoices 
                                     connection.query(invoicesQuery, [year, month], function (err, invoicesResult) {
                                         if (err)
                                             console.log(err)
@@ -185,7 +185,7 @@ router.get('/saft', (req, res) => {
                                                     SourceID: "TESTE", //TODO ???
                                                     SourceBilling: "P"
                                                 }
-                                                tmpInvoice.Hash = "0" //TODO gerar hash
+                                                tmpInvoice.Hash = invoiceIterator.hash || 0//TODO gerar hash
                                                 tmpInvoice.HashControl = "0" //TODO gerar hash
                                                 tmpInvoice.InvoiceDate = invoiceDate
                                                 tmpInvoice.InvoiceType = invoiceIterator.type
@@ -229,7 +229,7 @@ router.get('/saft', (req, res) => {
                                                             TaxCode: "ISE",
                                                             TaxPercentage: productIterator.tax
                                                         }
-                                                        tmpProduct.TaxExemptionReason = "Artigo 16.º N.º 6 alínea c) do CIVA"
+                                                        tmpProduct.TaxExemptionReason = "Artigo 16.º N.º 6 alínea c) do CIVA" //TODO confirmar esta alinea. é sempre esta?
                                                     }
                                                     tmpProduct.SettlementAmount = "0" //TODO O que é isto?
                                                     tmpInvoice.Line.push(tmpProduct)

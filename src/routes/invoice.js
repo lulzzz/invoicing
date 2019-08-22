@@ -2,7 +2,7 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
-const { getCustomerId, getNoInvoices, createNewInvoice, getInvoiceInfo, getDetailedInvoiceInfo, insertCustomer } = require('../db/databaseHelper');
+const { getCustomerId, getNoInvoices, createNewInvoice, getInvoiceInfo, getDetailedInvoiceInfo, insertCustomer, generateHash } = require('../db/databaseHelper');
 const generatePDF = require('../utils/generatePDF');
 const combinePDF = require('../utils/combinePDF');
 
@@ -59,7 +59,7 @@ const createInvoice = (invoiceInfo) => {
             var payments = invoiceInfo.payments
             var header = invoiceInfo.header //specific for exam centers info and number
             var date = new Date(); // Or the date you'd like converted.
-            isoDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+            var isoDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0,19);
             /////Get customerID and insert invoice in invoices table/////
             var customerId = await getCustomerId(customerNIF).catch((error) => { return null })
 
@@ -79,11 +79,14 @@ const createInvoice = (invoiceInfo) => {
 
             /////Create invoice reference/////
             var noInvoices = await getNoInvoices(date, header.number)
+            let previousInvoiceRef = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices)
 
             var reference = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices + 1)
 
+            var hash = await generateHash(previousInvoiceRef, reference, isoDate, products)
+            console.log(hash);
             // insert invoice with transaction
-            await createNewInvoice(reference, invoiceType, date, customerId, products, payments, header)
+            await createNewInvoice(reference, invoiceType, isoDate, customerId, products, payments, header, hash)
 
             const values = await getDetailedInvoiceInfo(reference)
             const pdf = await generatePDF(values)

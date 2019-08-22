@@ -1,4 +1,5 @@
 const connection = require('../db/mysql');
+const hash = require('../utils/hash');
 
 var getProductId = (code) => {
     return new Promise((resolve, reject) => {
@@ -78,6 +79,32 @@ module.exports = {
         })
     },
 
+    generateHash: (previousInvoiceRef, reference, isoDate, products) => {
+        return new Promise((resolve, reject) => {
+            var sql = "select hash from invoices where reference = ?";
+            connection.query(sql, [previousInvoiceRef], function (err, result) {
+                var previousHash = ""
+                if (err) {
+                    console.log(err);
+                    reject(err.sqlMessage)
+                }
+                else {
+                    if (result.length !== 0)
+                        previousHash = (result[0].hash);
+                    // resolve(result[0].hash)
+                }
+                console.log(previousHash);
+                var grossTotal = 0
+                products.forEach(element => {
+                    grossTotal += element.unitPrice * element.quantity
+                });
+                var newHash = hash(isoDate.slice(0, 10), isoDate, reference, grossTotal.toFixed(2), previousHash)
+                resolve(newHash)
+            })
+
+        })
+    },
+
     assignProductsToInvoice: async (invoiceId, products) => {
         var values = []
         for await (const product of products) {
@@ -104,7 +131,7 @@ module.exports = {
     },
 
     //insert invoices in invoices and invoices_products using transactions
-    createNewInvoice: async (reference, invoiceType, date, customerId, products, payments, header) => {
+    createNewInvoice: async (reference, invoiceType, date, customerId, products, payments, header, hash) => {
         return new Promise((resolve, reject) => {
             connection.getConnection(async (err, connection) => {
                 connection.beginTransaction(async (err) => {
@@ -115,8 +142,8 @@ module.exports = {
                             //Failure
                         });
                     } else {
-                        values = [reference, invoiceType, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email, header.number]
-                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email, header_number) VALUES (?)"
+                        values = [reference, invoiceType, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email, header.number, hash]
+                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email, header_number, hash) VALUES (?)"
                         connection.query(sql, [values], async (err, result) => {
                             if (err) {          //Query Error (Rollback and release connection)
                                 connection.rollback(() => {
