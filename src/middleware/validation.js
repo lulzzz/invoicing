@@ -25,25 +25,19 @@ function validateNIF(value) {
 
 exports.customerCompanyPostValidation = [
   body('name')
-    .exists().withMessage('name field must exist')
     .not().isEmpty().withMessage('name field must not be empty'),
   body('nif')
-    .exists().withMessage('NIF must exist')
     .not().isEmpty().withMessage('NIF must not be empty')
     .isInt().withMessage('NIF must be a number')
     .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits'),
   body('address')
-    .exists().withMessage('address field must exist')
     .not().isEmpty().withMessage('address field must not be empty'),
   body('postalCode')
-    .exists().withMessage('postal code field must exist')
     .not().isEmpty().withMessage('postal code field must not be empty')
     .matches(/^([0-9]{4}-[0-9]{3})$/).withMessage('postal code should be in the form nnnn-nnn'),
   body('city')
-    .exists().withMessage('city field must exist')
     .not().isEmpty().withMessage('city field must not be empty'),
   body('country')
-    .exists().withMessage('country field must exist')
     .not().isEmpty().withMessage('country field must not be empty')
 ]
 
@@ -106,15 +100,12 @@ exports.nifValidation = [
 exports.productPostValidation = [
   body('productType')
     .not().isEmpty().withMessage('product type should not be empty')
-    .exists().withMessage('product type field must exist')
     .matches(/^(S|P|O|E|I){1}$/).withMessage("product type should be 'S', 'P', 'O', 'E' or 'I'"),
   body('code')
     .not().isEmpty().withMessage('product code should not be empty')
-    .exists().withMessage('product code field must exist')
     .custom(value => !/\s/.test(value)).withMessage('No spaces are allowed in the product code'),
   body('description')
     .not().isEmpty().withMessage('product description should not be empty')
-    .exists().withMessage('product description field must exist')
 ]
 
 exports.productPatchValidation = [
@@ -161,35 +152,28 @@ exports.invoiceValidation = [
 
   // invoice validation
   body('invoice.*.type')
-    .not().isEmpty()
-    .exists()
-    .matches(/^(FR)$/),
+    .not().isEmpty().withMessage('invoice type should not be empty')
+    .matches(/^(FR|FS|FT){1}$/).withMessage('invoice type should be \'FR\', \'FS\' or \'FT\''),
   body('invoice.*.customerNIF')
     .not().isEmpty().withMessage('customerNIF should not be empty')
-    .exists().withMessage('customerNIF field must exist')
     .isInt().withMessage('customerNIF must be a number')
     .matches(/^[0-9]{9}/).withMessage('customerNIF must have 9 digits')
     /* .custom(nif => validateNIF(nif)).withMessage('nif is invalid') */,
   body('invoice.*.products')
-    .not().isEmpty().withMessage('products should not be empty')
-    .exists().withMessage('products field must exist'),
+    .not().isEmpty().withMessage('products should not be empty'),
   // products validation
   body('invoice.*.products.*.code')
     .not().isEmpty().withMessage('product code should not be empty')
-    .exists().withMessage('product code field must exist')
     .custom(value => !/\s/.test(value)).withMessage('No spaces are allowed in the product code'),
   body('invoice.*.products.*.unitPrice')
     .not().isEmpty().withMessage('unit price should not be empty')
-    .exists().withMessage('unit price field must exist')
     .isDecimal({ min: 0.0 }).withMessage('unit price should be a number')
     .custom(uPrice => uPrice >= 0).withMessage('unit price should be >= 0'),
   body('invoice.*.products.*.quantity')
     .not().isEmpty().withMessage('product quantity should not be empty')
-    .exists().withMessage('product quantity field must exist')
     .isInt({ min: 1 }).withMessage('quantity should be a positive integer (> 1)'),
   body('invoice.*.products.*.tax')
     .not().isEmpty().withMessage('product tax should not be empty')
-    .exists().withMessage('product tax field must exist')
     .isDecimal({ min: 0.0 }).withMessage('tax should be a number')
     .custom(uPrice => uPrice >= 0).withMessage('tax should be >= 0'),
   // payments validation
