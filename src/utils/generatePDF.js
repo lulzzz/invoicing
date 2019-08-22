@@ -12,6 +12,31 @@ const compile = async (templateName, data) => {
 
 const formatData = (data) => {
 
+    if (data.company.phone) {
+        data.company.phone = 'Telef. nº ' + data.company.phone
+    }
+
+    // if (data.company.fax) {
+    //     data.company.fax = 'Fax nº ' + data.company.fax
+    // }
+
+    if (data.company.email) {
+        data.company.email = 'Email: ' + data.company.email
+    }
+
+    if (data.header.phone) {
+        data.header.phone = 'Telef. nº ' + data.header.phone
+    }
+
+    // if (data.header.fax) {
+    //     data.header.fax = 'Fax nº ' + data.header.fax
+    // }
+
+    if (data.header.email) {
+        data.header.email = 'Email: ' + data.header.email
+    }
+
+
     data.products.forEach(element => {
         element.unitPrice = element.unitPrice.toFixed(2)
         element.quantity = element.quantity.toFixed(2)
@@ -44,9 +69,11 @@ const formatData = (data) => {
         element.value = element.value.toFixed(2)
     })
 
-    let processed = "Processado por programa certificado n.º xxxx/AT" // TODO numero de certificação
-    data.signature += "-" + processed
-
+    if (data.signature) {
+        let processed = "Processado por programa certificado n.º xxxx/AT" // TODO numero de certificação
+        data.signature += "-" + processed
+    }
+    
     return data
 }
 
