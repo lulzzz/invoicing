@@ -301,8 +301,10 @@ module.exports = {
                 else {
                     values.reference = result[0].reference
                     values.createdAt = result[0].createdAt
-                    let hash = result[0].hash
-                    values.signature = hash.charAt(0) + hash.charAt(10) + hash.charAt(20) + hash.charAt(30)
+                    if (result[0].hash) {
+                        let hash = result[0].hash
+                        values.signature = hash.charAt(0) + hash.charAt(10) + hash.charAt(20) + hash.charAt(30)
+                    }
                     let header = {}
                     header.name = result[0].header_name
                     header.address = result[0].header_address
