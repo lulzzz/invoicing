@@ -285,7 +285,7 @@ module.exports = {
 
         var companyQuery = "SELECT shortName, longName, nif, address, postalCode, city, country, phone, email, fax FROM company"
 
-        var invoiceQuery = 'SELECT reference, createdAt, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email FROM invoices WHERE reference = ?'
+        var invoiceQuery = 'SELECT reference, createdAt, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email, hash FROM invoices WHERE reference = ?'
 
         var paymentQuery = "SELECT paymentMethod.method, paymentMethod.value "
             + "FROM paymentmethod INNER JOIN invoices "
@@ -301,6 +301,8 @@ module.exports = {
                 else {
                     values.reference = result[0].reference
                     values.createdAt = result[0].createdAt
+                    let hash = result[0].hash
+                    values.signature = hash.charAt(0) + hash.charAt(10) + hash.charAt(20) + hash.charAt(30)
                     let header = {}
                     header.name = result[0].header_name
                     header.address = result[0].header_address

@@ -44,6 +44,9 @@ const formatData = (data) => {
         element.value = element.value.toFixed(2)
     })
 
+    let processed = "Processado por programa certificado n.º xxxx/AT" // TODO numero de certificação
+    data.signature += "-" + processed
+
     return data
 }
 
