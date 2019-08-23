@@ -38,7 +38,9 @@ exports.customerCompanyPostValidation = [
   body('city')
     .not().isEmpty().withMessage('city field must not be empty'),
   body('country')
-    .not().isEmpty().withMessage('country field must not be empty')
+    .not().isEmpty().withMessage('country field must not be empty'),
+  body('permit')
+    .not().isEmpty().withMessage('permit must not be empty')
 ]
 
 exports.customerPatchValidation = [
@@ -64,8 +66,9 @@ exports.customerPatchValidation = [
     .not().isEmpty().withMessage('city field must not be empty'),
   body('country')
     .optional()
-    .not().isEmpty().withMessage('country field must not be empty')
-  //TODO add validation permits
+    .not().isEmpty().withMessage('country field must not be empty'),
+  body('permit')
+    .not().isEmpty().withMessage('permit must not be empty')
 ]
 
 exports.companyPatchValidation = [
