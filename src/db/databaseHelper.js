@@ -93,7 +93,6 @@ module.exports = {
                         previousHash = (result[0].hash);
                     // resolve(result[0].hash)
                 }
-                console.log(previousHash);
                 var grossTotal = 0
                 products.forEach(element => {
                     grossTotal += element.unitPrice * element.quantity

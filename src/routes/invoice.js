@@ -84,7 +84,7 @@ const createInvoice = (invoiceInfo) => {
             var reference = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices + 1)
 
             var hash = await generateHash(previousInvoiceRef, reference, isoDate, products)
-            console.log(hash);
+            
             // insert invoice with transaction
             await createNewInvoice(reference, invoiceType, isoDate, customerId, products, payments, header, hash)
 

@@ -231,7 +231,6 @@ router.get('/saft', (req, res) => {
                                                         }
                                                         tmpProduct.TaxExemptionReason = "Artigo 16.º N.º 6 alínea c) do CIVA" //TODO confirmar esta alinea. é sempre esta?
                                                     }
-                                                    tmpProduct.SettlementAmount = "0" //TODO O que é isto?
                                                     tmpInvoice.Line.push(tmpProduct)
 
                                                     //Calcular somas de invoice e de total
