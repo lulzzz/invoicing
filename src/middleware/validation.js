@@ -29,7 +29,7 @@ exports.customerCompanyPostValidation = [
   body('nif')
     .not().isEmpty().withMessage('NIF must not be empty')
     .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits'),
+    .matches(/(^[0-9]{9})$/).withMessage('NIF must have 9 digits'),
   body('address')
     .not().isEmpty().withMessage('address field must not be empty'),
   body('postalCode')
@@ -46,14 +46,14 @@ exports.customerCompanyPostValidation = [
 exports.customerPatchValidation = [
   param('nif')
     .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits'),
+    .matches(/(^[0-9]{9})$/).withMessage('NIF must have 9 digits'),
   body('name')
     .optional().not().isEmpty().withMessage('name field must not be empty'),
   body('nif')
     .optional()
     .not().isEmpty().withMessage('NIF must not be empty')
     .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits'),
+    .matches(/(^[0-9]{9})$/).withMessage('NIF must have 9 digits'),
   body('address')
     .optional()
     .not().isEmpty().withMessage('address field must not be empty'),
@@ -78,7 +78,7 @@ exports.companyPatchValidation = [
     .optional()
     .not().isEmpty().withMessage('NIF must not be empty')
     .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits'),
+    .matches(/(^[0-9]{9})$/).withMessage('NIF must have 9 digits'),
   body('address')
     .optional()
     .not().isEmpty().withMessage('address field must not be empty'),
@@ -97,7 +97,7 @@ exports.companyPatchValidation = [
 exports.nifValidation = [
   param('nif')
     .isInt().withMessage('NIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('NIF must have 9 digits')
+    .matches(/(^[0-9]{9})$/).withMessage('NIF must have 9 digits')
 ]
 
 exports.productPostValidation = [
@@ -160,7 +160,7 @@ exports.invoiceValidation = [
   body('invoice.*.customerNIF')
     .not().isEmpty().withMessage('customerNIF should not be empty')
     .isInt().withMessage('customerNIF must be a number')
-    .matches(/^[0-9]{9}/).withMessage('customerNIF must have 9 digits')
+    .matches(/(^[0-9]{9})$/).withMessage('customerNIF must have 9 digits')
     /* .custom(nif => validateNIF(nif)).withMessage('nif is invalid') */,
   body('invoice.*.products')
     .not().isEmpty().withMessage('products should not be empty'),
