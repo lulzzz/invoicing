@@ -154,6 +154,8 @@ exports.invoiceValidation = [
 
 
   // invoice validation
+  body('invoice')
+    .not().isEmpty().withMessage('invoice should not be empty'),
   body('invoice.*.type')
     .not().isEmpty().withMessage('invoice type should not be empty')
     .matches(/^(FR|FS|FT){1}$/).withMessage('invoice type should be \'FR\', \'FS\' or \'FT\''),
