@@ -130,7 +130,7 @@ module.exports = {
     },
 
     //insert invoices in invoices and invoices_products using transactions
-    createNewInvoice: async (reference, invoiceType, date, customerId, products, payments, header, hash) => {
+    createNewInvoice: async (reference, invoiceType, serie, invoiceNo, date, customerId, products, payments, header, hash) => {
         return new Promise((resolve, reject) => {
             connection.getConnection(async (err, connection) => {
                 connection.beginTransaction(async (err) => {
@@ -141,8 +141,8 @@ module.exports = {
                             //Failure
                         });
                     } else {
-                        values = [reference, invoiceType, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email, header.number, hash]
-                        let sql = "INSERT INTO invoices (reference, type, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email, header_number, hash) VALUES (?)"
+                        values = [reference, invoiceType, serie, invoiceNo, date, customerId, header.name, header.address, header.postalCode, header.city, header.phone, header.fax, header.email, header.number, hash]
+                        let sql = "INSERT INTO invoices (reference, type, serie, invoiceNo, createdAt, idCustomer, header_name, header_address, header_postalCode, header_city, header_phone, header_fax, header_email, header_number, hash) VALUES (?)"
                         connection.query(sql, [values], async (err, result) => {
                             if (err) {          //Query Error (Rollback and release connection)
                                 connection.rollback(() => {
