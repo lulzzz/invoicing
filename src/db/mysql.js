@@ -9,5 +9,11 @@ var pool = mysql.createPool({
     dateStrings: true
 });
 
+// this need to be here for select with large fields (lots of products for one invoice in saft)
+pool.query('SET SESSION group_concat_max_len = 100000;', function (err, result) {
+    if (err)
+        console.log(err);
+})
+
 
 module.exports = pool
