@@ -193,6 +193,9 @@ exports.invoiceValidation = [
 ]
 
 exports.invoiceValidationResult = (req, res, next) => {
+  if (Object.keys(req.body).length === 0) {
+    return res.status(422).send({ error: 'Body should not be empty' });
+  }
   const errors = validationResult(req).errors;
   req.errors = []
   if (errors.length !== 0) {
