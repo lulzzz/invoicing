@@ -36,9 +36,9 @@ router.get('/saft', (req, res) => {
                 DateCreated: new Date().toISOString().slice(0, 10),
                 TaxEntity: "Global",
                 ProductCompanyTaxID: "???KBZ???", //TODO KBZ?
-                SoftwareCertificateNumber: "900", //TODO ???
+                SoftwareCertificateNumber: "0", //TODO Atribuido pelas finanças
                 ProductID: "GCE 2010/VDAUDIT", //TODO ANIGEST?
-                ProductVersion: "1.1", //TODO ??
+                ProductVersion: "1.1", //TODO 1.0??
             },
             MasterFiles: {},
             SourceDocuments: {}
@@ -68,6 +68,7 @@ router.get('/saft', (req, res) => {
         + " ON ug.idProduct = u.idProduct"
         + " WHERE ((YEAR(g.createdAt) = ?) AND (MONTH(g.createdAt) = ?))"
         + " GROUP BY g.reference"
+        + " ORDER BY serie, invoiceNo, createdAt"
     //https://stackoverflow.com/questions/53766447/sql-many-to-many-json
 
     var taxQuery = 'select distinct tax from invoices_products'
@@ -159,7 +160,7 @@ router.get('/saft', (req, res) => {
                                         TaxTable.TaxTableEntry.push(tmp)
                                     });
                                     SAFT.AuditFile.MasterFiles.TaxTable = TaxTable
-                                    // TODO ordenar invoices 
+                                    
                                     connection.query(invoicesQuery, [year, month], function (err, invoicesResult) {
                                         if (err)
                                             console.log(err)
@@ -182,11 +183,11 @@ router.get('/saft', (req, res) => {
                                                 tmpInvoice.DocumentStatus = {
                                                     InvoiceStatus: "N",
                                                     InvoiceStatusDate: invoiceDateTime,
-                                                    SourceID: "TESTE", //TODO ???
+                                                    SourceID: "TESTE", //TODO Id user - ANIECA??
                                                     SourceBilling: "P"
                                                 }
                                                 tmpInvoice.Hash = invoiceIterator.hash || 0
-                                                tmpInvoice.HashControl = "0" //TODO gerar hashControl
+                                                tmpInvoice.HashControl = "0" //TODO gerar hashControl - SoftwareCertificateNumber.KeyVersion
                                                 tmpInvoice.InvoiceDate = invoiceDate
                                                 tmpInvoice.InvoiceType = invoiceIterator.type
                                                 tmpInvoice.SpecialRegimes = {
@@ -194,7 +195,7 @@ router.get('/saft', (req, res) => {
                                                     CashVATSchemeIndicator: "0",
                                                     ThirdPartiesBillingIndicator: "0"
                                                 }
-                                                tmpInvoice.SourceID = "TESTE" //TODO ???
+                                                tmpInvoice.SourceID = "TESTE" //TODO Id user - ANIECA??
                                                 tmpInvoice.SystemEntryDate = invoiceDateTime
                                                 tmpInvoice.CustomerID = invoiceIterator.idCustomer
 
