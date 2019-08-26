@@ -97,7 +97,7 @@ router.delete('/products/:code', validation.productCodeValidation, validation.va
     else if (result.affectedRows === 0) {
       return res.status(404).send({ error: "Product with code " + productCode + " could not be found." })
     }
-    else return res.send('Product with code ' + nif + ' was deleted.') //TODO send deleted product
+    else return res.send(204).send()
   });
 })
 

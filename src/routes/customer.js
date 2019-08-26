@@ -95,7 +95,7 @@ router.delete('/customers/:nif', validation.nifValidation, validation.validation
     else if (result.affectedRows === 0) {
       return res.status(404).send("Customer with NIF " + nif + " could not be found.")
     }
-    else return res.send('Customer with NIF ' + nif + ' was deleted.') //TODO send deleted customer
+    else return res.send(204).send()
   });
 })
 
