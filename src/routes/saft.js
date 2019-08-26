@@ -68,7 +68,7 @@ router.get('/saft', (req, res) => {
         + " ON ug.idProduct = u.idProduct"
         + " WHERE ((YEAR(g.createdAt) = ?) AND (MONTH(g.createdAt) = ?))"
         + " GROUP BY g.reference"
-        + " ORDER BY serie, invoiceNo, createdAt"
+        + " ORDER BY serie, invoiceNo + 0, createdAt"
     //https://stackoverflow.com/questions/53766447/sql-many-to-many-json
 
     var taxQuery = 'select distinct tax from invoices_products'
