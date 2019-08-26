@@ -4,7 +4,7 @@ const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 
 //Create a new customer
-router.post('/customers', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {
+router.post('/customers', validation.customerPostValidation, validation.validationResult, (req, res) => {
 
   var values = []
   values.push(req.body.name)

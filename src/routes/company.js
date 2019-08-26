@@ -4,7 +4,7 @@ const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 
 //Create a new user
-router.post('/company', validation.customerCompanyPostValidation, validation.validationResult, (req, res) => {
+router.post('/company', validation.companyPostValidation, validation.validationResult, (req, res) => {
 
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
     if (err) return res.status(400).send({ error: err.sqlMessage });

@@ -23,7 +23,25 @@ function validateNIF(value) {
   return checkDigit === Number(nif[8]);
 } /* .custom(nif => validateNIF(nif)).withMessage('nif is invalid') */
 
-exports.customerCompanyPostValidation = [
+exports.companyPostValidation = [
+  body('name')
+    .not().isEmpty().withMessage('name field must not be empty'),
+  body('nif')
+    .not().isEmpty().withMessage('NIF must not be empty')
+    .isInt().withMessage('NIF must be a number')
+    .matches(/(^[0-9]{9})$/).withMessage('NIF must have 9 digits'),
+  body('address')
+    .not().isEmpty().withMessage('address field must not be empty'),
+  body('postalCode')
+    .not().isEmpty().withMessage('postal code field must not be empty')
+    .matches(/^([0-9]{4}-[0-9]{3})$/).withMessage('postal code should be in the form nnnn-nnn'),
+  body('city')
+    .not().isEmpty().withMessage('city field must not be empty'),
+  body('country')
+    .not().isEmpty().withMessage('country field must not be empty'),
+]
+
+exports.customerPostValidation = [
   body('name')
     .not().isEmpty().withMessage('name field must not be empty'),
   body('nif')
