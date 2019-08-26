@@ -12,6 +12,8 @@ const compile = async (templateName, data) => {
 
 const formatData = (data) => {
 
+    data.createdAt = data.createdAt.split(" ")[0]
+
     if (data.company.phone) {
         data.company.phone = 'Telef. nº ' + data.company.phone
     }
@@ -73,7 +75,7 @@ const formatData = (data) => {
         let processed = "Processado por programa certificado n.º xxxx/AT" // TODO numero de certificação
         data.signature += "-" + processed
     }
-    
+
     return data
 }
 
