@@ -132,7 +132,7 @@ exports.productCodeValidation = [
 ]
 
 exports.invoiceValidation = [
-  // header validation
+  // header validation -> header is specific information for exam centers
   body('header')
     .not().isEmpty().withMessage('header should not be empty'),
   body('header.name')
@@ -144,9 +144,9 @@ exports.invoiceValidation = [
   body('header.city')
     .not().isEmpty().withMessage('header city should not be empty'),
   body('header.phone')
-    .not().isEmpty().withMessage('header name should not be empty'),
-  body('header.fax')
-    .not().isEmpty().withMessage('header fax should not be empty'),
+    .not().isEmpty().withMessage('header phone should not be empty'),
+  // body('header.fax')
+  //   .not().isEmpty().withMessage('header fax should not be empty'),
   body('header.email')
     .not().isEmpty().withMessage('header email should not be empty'),
   body('header.number')
@@ -198,7 +198,11 @@ exports.invoiceValidationResult = (req, res, next) => {
   if (errors.length !== 0) {
     let headerError = (errors.filter(errors => errors.param.match(/^header(.*)/)))
     if (headerError.length !== 0) {
-      return res.status(422).send({ error: headerError });
+      return res.status(422).send({ error: headerError[0].msg });
+    }
+    let invoiceError = (errors.filter(errors => errors.param.match(/^invoice$/)))
+    if (invoiceError.length !== 0) {
+      return res.status(422).send({ error: invoiceError[0].msg });
     }
     // req.errors.line = errors.param.match(/(?<=\[).+?(?=\])/)[0]
     req.errors = [...new Set(errors.map(function (d) { return { index: parseInt(d.param.match(/(?<=\[).+?(?=\])/)), message: d.msg } }))];
