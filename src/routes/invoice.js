@@ -86,7 +86,7 @@ const createInvoice = (invoiceInfo) => {
             var reference = invoiceType + ' ' + serie + '/' + invoiceNo
 
             var hash = await generateHash(previousInvoiceRef, reference, isoDate, products)
-            // TODO save separately invoiceType, serie, invoiceNumber
+
             // insert invoice with transaction
             await createNewInvoice(reference, invoiceType, serie, invoiceNo, isoDate, customerId, products, payments, header, hash)
 
