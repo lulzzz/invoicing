@@ -8,7 +8,7 @@ const combinePDF = require('../utils/combinePDF');
 
 //Get all invoices
 router.get('/invoices', async (req, res) => {
-    var query = 'SELECT reference FROM invoices'
+    var query = 'SELECT reference FROM invoices ORDER BY serie, invoiceNo + 0, createdAt'
     // + 'inner join invoices_products on invoices.idInvoice = invoices_products.idinvoice '
     // + 'inner join products on invoices_products.idProduct = products.idProduct '
     connection.query(query, function (error, results) {
