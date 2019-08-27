@@ -11,12 +11,6 @@ var pool = mysql.createPool({
     multipleStatements: true
 });
 
-// this need to be here for select with large fields (lots of products for one invoice in saft)
-pool.query('SET SESSION group_concat_max_len = 100000;', function (err, result) {
-    if (err)
-        console.log(err);
-})
-
 // To run the database creation script
 // var initQuery = fs.readFileSync(__dirname + '/db.sql').toString()
 
