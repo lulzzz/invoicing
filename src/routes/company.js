@@ -12,16 +12,17 @@ router.post('/company', validation.companyPostValidation, validation.validationR
       return res.status(409).send('Company already created')
     } else {
       var values = []
-      values.push(req.body.name)
+      values.push(req.body.shortName)
+      values.push(req.body.longName)
       values.push(req.body.nif)
       values.push(req.body.address)
       values.push(req.body.postalCode)
       values.push(req.body.city)
       values.push(req.body.country)
-      var sql = "INSERT INTO company (`name`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
+      var sql = "INSERT INTO company (`shortName`, `longName`, `nif`, `address`, `postalCode`, `city`, `country`) VALUES (?)";
       connection.query(sql, [values], function (err, result) {
         if (err) return res.status(400).send({ error: err.sqlMessage });
-        else connection.query("SELECT `name`, `nif`, `address`, `postalCode`, `city`, `country` from company where idCompany = ?", result.insertId, function (err, result) {
+        else connection.query("SELECT `shortName`, `longName`, `nif`, `address`, `postalCode`, `city`, `country` from company where idCompany = ?", result.insertId, function (err, result) {
           if (err) return res.status(400).send({ error: err.sqlMessage });
           else return res.status(201).send(result[0])
         })
@@ -31,7 +32,7 @@ router.post('/company', validation.companyPostValidation, validation.validationR
 })
 
 router.get('/company', (req, res) => {
-  var sql = "SELECT name, nif, address, postalCode, city, country FROM company LIMIT 1";
+  var sql = "SELECT shortName, longName, nif, address, postalCode, city, country FROM company LIMIT 1";
   connection.query(sql, function (err, result) {
     if (err) return res.status(400).send({ error: err.sqlMessage });
     else if (result.length === 0) {
@@ -48,7 +49,7 @@ router.patch('/company', validation.companyPatchValidation, validation.validatio
   if (updates.length === 0) {
     return res.status(400).send({ error: 'Must provide parameters' })
   }
-  const allowedUpdates = ['name', 'nif', 'address', 'postalCode', 'city', 'country']
+  const allowedUpdates = [`shortName`, `longName`, 'nif', 'address', 'postalCode', 'city', 'country']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
   // check if the updates are allowed
   if (!isValidOperation) {
@@ -73,12 +74,3 @@ router.patch('/company', validation.companyPatchValidation, validation.validatio
 })
 
 module.exports = router
-
-// {
-//     name: String,
-//     nif: Number (xxxxxxxxx),
-//     address: String,
-//     postalCode: String (xxxx-xxx),
-//     city: String,
-//     country: String (PT)
-// }
