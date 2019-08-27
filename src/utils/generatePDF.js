@@ -76,6 +76,12 @@ const formatData = (data) => {
         data.signature += "-" + processed
     }
 
+    function base64_encode(file) {
+        var bitmap = fs.readFileSync(file);
+        return new Buffer.from(bitmap).toString('base64');
+    }
+    data.img = 'data:image/png;base64,' + base64_encode(process.cwd() + '/src/templates/anieca.png');
+
     return data
 }
 
