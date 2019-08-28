@@ -1,4 +1,4 @@
-const { check, param, body, validationResult } = require('express-validator');
+const { query, param, body, validationResult } = require('express-validator');
 
 function validateNIF(value) {
   const nif = typeof value === 'string' ? value : value.toString();
@@ -214,6 +214,15 @@ exports.invoiceValidation = [
     .not().isEmpty().withMessage('value should not be empty')
     .isDecimal().withMessage('value should be a number')
     .custom(value => value >= 0).withMessage('unit price should be >= 0'),
+]
+
+exports.saftReqValidation = [
+  query('year')
+    .not().isEmpty().withMessage('year should not be empty')
+    .matches(/^\d{4}$/).withMessage('invalid year'),
+  query('month')
+    .not().isEmpty().withMessage('month should not be empty')
+    .matches(/^(0?[1-9]|1[012])$/).withMessage('invalid month')
 ]
 
 exports.invoiceValidationResult = (req, res, next) => {
