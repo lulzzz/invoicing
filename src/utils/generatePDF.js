@@ -61,8 +61,8 @@ const formatData = (data) => {
     data.summary.tax = data.summary.tax.toFixed(2)
     data.summary.total = data.summary.total.toFixed(2)
 
-    if (data.customer.permit === 0)
-        data.customer.permit = null
+    if (data.customer.permit === 0 || !data.customer.permit)
+        data.customer.permit = 999
     if (data.customer.permit) {
         data.customer.permit = 'Alvará nº ' + data.customer.permit
     }
