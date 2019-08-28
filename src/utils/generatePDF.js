@@ -45,10 +45,11 @@ const formatData = (data) => {
         element.tax = element.tax.toFixed(2)
         element.liquidTotal = element.liquidTotal.toFixed(2)
     });
-
+    data.exemption = ''
     data.taxes.forEach(element => {
         if (element.tax === 0) {
-            element.tax = 'Isento'
+            element.tax = 'Isento\*'
+            data.exemption = '\*Artigo 16.º N.º 6 alínea c) do CIVA'
         }
         else { element.tax = 'IVA' + element.tax }
         element.incidence = element.incidence.toFixed(2)

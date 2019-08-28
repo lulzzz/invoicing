@@ -144,24 +144,34 @@
   <div class="footer">
     <div class="container">
       <div class="row">
-        <div class="col col-sm-5 border">
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th scope="col">Imposto</th>
-                <th scope="col" style="text-align: right">Incidência</th>
-                <th scope="col" style="text-align: right">Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each taxes}}
-              <tr>
-                <td>{{this.tax}}</td>
-                <td style="text-align: right">{{this.incidence}}€</td>
-                <td style="text-align: right">{{this.value}}€</td>
-              </tr>
-              {{/each}}
-          </table>
+        <div class="col col-sm-5">
+          <div class="row">
+            <div class="col border">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th scope="col">Imposto</th>
+                    <th scope="col" style="text-align: right">Incidência</th>
+                    <th scope="col" style="text-align: right">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each taxes}}
+                  <tr>
+                    <td>{{this.tax}}</td>
+                    <td style="text-align: right">{{this.incidence}}€</td>
+                    <td style="text-align: right">{{this.value}}€</td>
+                  </tr>
+                  {{/each}}
+              </table>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col" style="text-align: right">
+              <b style="font-size:12px;">{{exemption}}</b>
+            </div>
+          </div>
         </div>
 
         <div class="col col-sm-2"></div>
@@ -188,6 +198,13 @@
 
       </div>
     </div>
+
+    {{!-- <div class="container" style="margin-top: 0px; margin-bottom: 0px;">
+      <div class="row">
+        <div class="col">
+        </div>
+      </div>
+    </div> --}}
 
     <div class="container" style="margin-bottom: 5%">
       <div class="row">
