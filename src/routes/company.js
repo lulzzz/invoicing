@@ -38,7 +38,7 @@ router.get('/company', (req, res) => {
     else if (result.length === 0) {
       return res.status(404).send({ error: 'No company found' });
     }
-    else return res.send(result)
+    else return res.send(result[0])
   });
 })
 
