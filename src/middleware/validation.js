@@ -240,7 +240,7 @@ exports.invoiceValidationResult = (req, res, next) => {
 exports.validationResult = (req, res, next) => {
   const errors = validationResult(req).errors;
   if (errors.length !== 0) {
-    return res.status(422).send({ error: errors });
+    return res.status(422).send({ error: errors.map(e => e.msg).join(", ") })
   }
   next()
 }
