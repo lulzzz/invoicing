@@ -79,7 +79,7 @@ router.get('/saft', validation.saftReqValidation, validation.validationResult, (
     var companyQuery = "SELECT shortName, longName, nif, address, postalCode, city, country, phone, email, fax FROM `invoice-app-test`.company;"
 
     // this need to be here for select with large fields (lots of products for one invoice in saft)
-    var length = "SET SESSION group_concat_max_len = 1000000;"
+    var length = "SET GLOBAL group_concat_max_len = 1000000;"
 
     connection.query(length, (err, result) => {
         if (err)
