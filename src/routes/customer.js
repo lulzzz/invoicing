@@ -50,7 +50,7 @@ router.get('/customers/:nif', validation.nifValidation, validation.validationRes
     else if (result.length === 0) {
       return res.status(404).send({ error: "Customer with NIF " + nif + " could not be found." })
     }
-    else return res.send(result)
+    else return res.send(result[0])
   });
 })
 
