@@ -2,12 +2,13 @@ const express = require('express');
 const router = new express.Router()
 const connection = require('../db/mysql');
 var builder = require('xmlbuilder');
+const validation = require('../middleware/validation');
 
 const round = (num) => {
     return Math.round(num * 1e2) / 1e2
 }
 
-router.get('/saft', (req, res) => {
+router.get('/saft', validation.saftReqValidation, validation.validationResult, (req, res) => {
     var year = req.query.year
     var month = req.query.month
     var lastDayOfMonth = new Date(year, month, 0).getDate(); //number of days of the current mont
@@ -76,17 +77,17 @@ router.get('/saft', (req, res) => {
         + ' WHERE ((YEAR(`invoices`.`createdAt`) = ?) AND (MONTH(`invoices`.`createdAt`) = ?))'
 
     var companyQuery = "SELECT shortName, longName, nif, address, postalCode, city, country, phone, email, fax FROM `invoice-app-test`.company;"
-    
+
     // this need to be here for select with large fields (lots of products for one invoice in saft)
     var length = "SET SESSION group_concat_max_len = 1000000;"
 
     connection.query(length, (err, result) => {
         if (err)
-            console.log(err);
+            return res.status(400).send({ error: err.sqlMessage });
         else {
             connection.query(companyQuery, function (err, companyResult) {
                 if (err)
-                    console.log(err);
+                    return res.status(400).send({ error: err.sqlMessage });
                 else {
                     var company = JSON.parse(JSON.stringify(companyResult[0]));
 
@@ -101,7 +102,7 @@ router.get('/saft', (req, res) => {
 
                     connection.query(customerQuery, [year, month], function (err, customerResult) {
                         if (err)
-                            console.log(err);
+                            return res.status(400).send({ error: err.sqlMessage });
                         else {
                             var customerRows = JSON.parse(JSON.stringify(customerResult));
 
@@ -129,7 +130,7 @@ router.get('/saft', (req, res) => {
 
                             connection.query(productQuery, [year, month], function (err, productsResult) {
                                 if (err)
-                                    console.log(err);
+                                    return res.status(400).send({ error: err.sqlMessage });
                                 else {
                                     var productRows = JSON.parse(JSON.stringify(productsResult));
 
@@ -146,7 +147,7 @@ router.get('/saft', (req, res) => {
 
                                     connection.query(taxQuery, [year, month], function (err, taxResult) {
                                         if (err)
-                                            console.log(err);
+                                            return res.status(400).send({ error: err.sqlMessage });
                                         else {
                                             var taxRows = JSON.parse(JSON.stringify(taxResult));
                                             var TaxTable = {
@@ -170,7 +171,7 @@ router.get('/saft', (req, res) => {
 
                                             connection.query(invoicesQuery, [year, month], function (err, invoicesResult) {
                                                 if (err)
-                                                    console.log(err)
+                                                    return res.status(400).send({ error: err.sqlMessage });
                                                 else {
                                                     var invoiceRows = JSON.parse(JSON.stringify(invoicesResult));
                                                     SalesInvoices = {}
