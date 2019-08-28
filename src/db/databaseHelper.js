@@ -236,7 +236,7 @@ module.exports = {
                     }, new Map());
 
                     // then, map your counts object back to an array
-                    let taxesObj = [...taxes].map(([tax, incidence]) => {
+                    let taxesObj = [...taxes].sort().map(([tax, incidence]) => {
                         var value = round(tax * incidence / 100)
                         return { tax, incidence, value }
                     })
