@@ -93,7 +93,7 @@ router.delete('/customers/:nif', validation.nifValidation, validation.validation
       return res.status(400).send({ error: err.sqlMessage });
     }
     else if (result.affectedRows === 0) {
-      return res.status(404).send("Customer with NIF " + nif + " could not be found.")
+      return res.status(404).send({ error: "Customer with NIF " + nif + " could not be found." })
     }
     else return res.send(204).send()
   });
