@@ -8,6 +8,7 @@ const round = (num) => {
     return Math.round(num * 1e2) / 1e2
 }
 
+// Generate SAFT
 router.get('/saft', validation.saftReqValidation, validation.validationResult, (req, res) => {
     var year = req.query.year
     var month = req.query.month

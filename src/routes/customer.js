@@ -3,7 +3,7 @@ const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 
-//Create a new customer
+// Create a new customer
 router.post('/customers', validation.customerPostValidation, validation.validationResult, (req, res) => {
 
   var values = []
@@ -31,6 +31,7 @@ router.post('/customers', validation.customerPostValidation, validation.validati
   });
 })
 
+// Get all customers
 router.get('/customers', (req, res) => {
   var sql = "SELECT name, nif, address, postalCode, city, country, permit FROM customers";
   connection.query(sql, function (err, result) {
@@ -39,6 +40,7 @@ router.get('/customers', (req, res) => {
   });
 })
 
+// Get single customer by nif
 router.get('/customers/:nif', validation.nifValidation, validation.validationResult, (req, res) => {
 
   var nif = req.params.nif
@@ -54,6 +56,7 @@ router.get('/customers/:nif', validation.nifValidation, validation.validationRes
   });
 })
 
+// Update customer by nif
 router.patch('/customers/:nif', validation.customerPatchValidation, validation.validationResult, (req, res) => {
 
   const updates = Object.keys(req.body)
@@ -84,6 +87,7 @@ router.patch('/customers/:nif', validation.customerPatchValidation, validation.v
   });
 })
 
+// Delete customer by nif
 router.delete('/customers/:nif', validation.nifValidation, validation.validationResult, (req, res) => {
 
   var nif = req.params.nif

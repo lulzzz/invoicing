@@ -6,7 +6,7 @@ const { getCustomerId, getNoInvoices, createNewInvoice, getInvoiceInfo, getDetai
 const generatePDF = require('../utils/generatePDF');
 const combinePDF = require('../utils/combinePDF');
 
-//Get all invoices
+// Get references of all invoices
 router.get('/invoices', async (req, res) => {
     var query = 'SELECT reference FROM invoices ORDER BY serie, invoiceNo + 0, createdAt'
     // + 'inner join invoices_products on invoices.idInvoice = invoices_products.idinvoice '
@@ -17,7 +17,7 @@ router.get('/invoices', async (req, res) => {
     })
 })
 
-//Get invoices by reference
+// Get invoice by reference
 router.get('/invoices/:ref', async (req, res) => {
 
     getInvoiceInfo(req.params.ref).then((values) => {
@@ -27,7 +27,7 @@ router.get('/invoices/:ref', async (req, res) => {
     })
 })
 
-//Get invoice pdf by reference
+// Get invoice pdf by reference
 router.get('/invoices/:ref/pdf', (req, res) => {
 
     getDetailedInvoiceInfo(req.params.ref).then(async (values) => {
@@ -40,7 +40,7 @@ router.get('/invoices/:ref/pdf', (req, res) => {
 
 })
 
-//Get detailed info from the invoice
+// Get detailed info from the invoice by reference
 router.get('/invoices/:ref/info', (req, res) => {
 
     getDetailedInvoiceInfo(req.params.ref).then((values) => {
@@ -50,6 +50,7 @@ router.get('/invoices/:ref/info', (req, res) => {
     })
 })
 
+// Helper function to create invoice
 const createInvoice = (invoiceInfo) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -100,7 +101,7 @@ const createInvoice = (invoiceInfo) => {
     })
 }
 
-//Create new invoice
+// Create new invoice
 router.post('/invoices', validation.invoiceValidation, validation.invoiceValidationResult, async (req, res) => {
 
     try {

@@ -3,7 +3,7 @@ const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 
-//Create a new product
+// Create a new product
 router.post('/products', validation.productPostValidation, validation.validationResult, (req, res) => {
 
   var values = []
@@ -37,7 +37,7 @@ router.get('/products', (req, res) => {
   });
 })
 
-//Get specific product
+// Get product by code
 router.get('/products/:code', validation.productCodeValidation, validation.validationResult, (req, res) => {
 
   var productCode = req.params.code
@@ -53,7 +53,7 @@ router.get('/products/:code', validation.productCodeValidation, validation.valid
   });
 })
 
-//Update Specific product
+// Update product by code
 router.patch('/products/:code', validation.productPatchValidation, validation.validationResult, (req, res) => {
   const updates = Object.keys(req.body)
   if (updates.length === 0) {
@@ -85,7 +85,7 @@ router.patch('/products/:code', validation.productPatchValidation, validation.va
   });
 })
 
-//Delete specific product
+// Delete product by code
 router.delete('/products/:code', validation.productCodeValidation, validation.validationResult, (req, res) => {
 
   var productCode = req.params.code

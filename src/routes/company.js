@@ -3,7 +3,7 @@ const router = new express.Router()
 const connection = require('../db/mysql');
 const validation = require('../middleware/validation');
 
-//Create a new user
+// Create a new company
 router.post('/company', validation.companyPostValidation, validation.validationResult, (req, res) => {
 
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
@@ -31,6 +31,7 @@ router.post('/company', validation.companyPostValidation, validation.validationR
   })
 })
 
+// Get company
 router.get('/company', (req, res) => {
   var sql = "SELECT shortName, longName, nif, address, postalCode, city, country FROM company LIMIT 1";
   connection.query(sql, function (err, result) {
@@ -42,6 +43,7 @@ router.get('/company', (req, res) => {
   });
 })
 
+// Update company
 router.patch('/company', validation.companyPatchValidation, validation.validationResult, (req, res) => {
 
   const updates = Object.keys(req.body)
