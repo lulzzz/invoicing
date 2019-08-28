@@ -9,7 +9,7 @@ router.post('/company', validation.companyPostValidation, validation.validationR
   connection.query("SELECT COUNT(*) as rowCount from company", (err, result) => {
     if (err) return res.status(400).send({ error: err.sqlMessage });
     else if (result[0].rowCount === 1) {
-      return res.status(409).send('Company already created')
+      return res.status(409).send({ error: 'Company already created' })
     } else {
       var values = []
       values.push(req.body.shortName)
@@ -36,7 +36,7 @@ router.get('/company', (req, res) => {
   connection.query(sql, function (err, result) {
     if (err) return res.status(400).send({ error: err.sqlMessage });
     else if (result.length === 0) {
-      return res.status(404).send('No company found');
+      return res.status(404).send({ error: 'No company found' });
     }
     else return res.send(result)
   });
