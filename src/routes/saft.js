@@ -211,45 +211,47 @@ router.get('/saft', validation.saftReqValidation, validation.validationResult, (
                                                         tmpInvoice.Line = []
                                                         let tmpTaxPayable = 0
                                                         let tmpNetTotal = 0
-
-                                                        let products = JSON.parse(invoiceIterator.products)
-                                                        for (const [index, productIterator] of products.entries()) {
-                                                            let tmpProduct = {}
-                                                            tmpProduct.LineNumber = index + 1
-                                                            tmpProduct.ProductCode = productIterator.code
-                                                            tmpProduct.ProductDescription = productIterator.description
-                                                            tmpProduct.Quantity = productIterator.quantity
-                                                            tmpProduct.UnitOfMeasure = "Unidade"
-                                                            tmpProduct.UnitPrice = productIterator.unitPrice
-                                                            tmpProduct.TaxPointDate = invoiceDate
-                                                            tmpProduct.Description = productIterator.description
-                                                            tmpProduct.CreditAmount = productIterator.unitPrice
-                                                            if (productIterator.tax !== 0) {
-                                                                tmpProduct.Tax = {
-                                                                    TaxType: "IVA",
-                                                                    TaxCountryRegion: "PT",
-                                                                    TaxCode: "NOR",
-                                                                    TaxPercentage: productIterator.tax
+                                                        try {
+                                                            let products = JSON.parse(invoiceIterator.products)
+                                                            for (const [index, productIterator] of products.entries()) {
+                                                                let tmpProduct = {}
+                                                                tmpProduct.LineNumber = index + 1
+                                                                tmpProduct.ProductCode = productIterator.code
+                                                                tmpProduct.ProductDescription = productIterator.description
+                                                                tmpProduct.Quantity = productIterator.quantity
+                                                                tmpProduct.UnitOfMeasure = "Unidade"
+                                                                tmpProduct.UnitPrice = productIterator.unitPrice
+                                                                tmpProduct.TaxPointDate = invoiceDate
+                                                                tmpProduct.Description = productIterator.description
+                                                                tmpProduct.CreditAmount = productIterator.unitPrice
+                                                                if (productIterator.tax !== 0) {
+                                                                    tmpProduct.Tax = {
+                                                                        TaxType: "IVA",
+                                                                        TaxCountryRegion: "PT",
+                                                                        TaxCode: "NOR",
+                                                                        TaxPercentage: productIterator.tax
+                                                                    }
                                                                 }
-                                                            }
-                                                            else {
-                                                                tmpProduct.Tax = {
-                                                                    TaxType: "IVA",
-                                                                    TaxCountryRegion: "PT",
-                                                                    TaxCode: "ISE",
-                                                                    TaxPercentage: productIterator.tax
+                                                                else {
+                                                                    tmpProduct.Tax = {
+                                                                        TaxType: "IVA",
+                                                                        TaxCountryRegion: "PT",
+                                                                        TaxCode: "ISE",
+                                                                        TaxPercentage: productIterator.tax
+                                                                    }
+                                                                    tmpProduct.TaxExemptionReason = "Artigo 16.º N.º 6 alínea c) do CIVA" //TODO confirmar esta alinea. é sempre esta?
                                                                 }
-                                                                tmpProduct.TaxExemptionReason = "Artigo 16.º N.º 6 alínea c) do CIVA" //TODO confirmar esta alinea. é sempre esta?
-                                                            }
-                                                            tmpInvoice.Line.push(tmpProduct)
+                                                                tmpInvoice.Line.push(tmpProduct)
 
-                                                            //Calcular somas de invoice e de total
-                                                            let productTotal = productIterator.quantity * productIterator.unitPrice
-                                                            tmpNetTotal += productTotal
-                                                            tmpTotalCredit += productTotal
-                                                            tmpTaxPayable += (productTotal * (productIterator.tax / 100))
+                                                                //Calcular somas de invoice e de total
+                                                                let productTotal = productIterator.quantity * productIterator.unitPrice
+                                                                tmpNetTotal += productTotal
+                                                                tmpTotalCredit += productTotal
+                                                                tmpTaxPayable += (productTotal * (productIterator.tax / 100))
+                                                            }
+                                                        } catch (error) {
+                                                            return res.status(500).send({ error: 'Internal error' })
                                                         }
-
                                                         tmpInvoice.DocumentTotals = {
                                                             TaxPayable: round(tmpTaxPayable),
                                                             NetTotal: round(tmpNetTotal),
