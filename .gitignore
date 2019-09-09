@@ -2,3 +2,4 @@ node_modules
 invoice_template
 config
 .vscode/launch.json
+/key
