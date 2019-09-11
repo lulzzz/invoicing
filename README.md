@@ -14,6 +14,10 @@ A set of public and private keys should be generated and placed inside key folde
 These keys are used to generate invoices hashes in [saft.js](./src/routes/saft.js).
 
 ---
+## Database
+To create the database, use the [db.sql](src/db/db.sql) file.
+
+---
 ## To Do
 1. In the [saft.js](./src/routes/saft.js) file, there are fields which can only be filled after the software is certified by the AT.
 
