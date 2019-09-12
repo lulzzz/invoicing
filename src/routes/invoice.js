@@ -82,7 +82,7 @@ const createInvoice = (invoiceInfo) => {
             var noInvoices = await getNoInvoices(date, header.number)
             let previousInvoiceRef = invoiceType + ' ' + header.number + new Date(date).getFullYear() + '/' + (noInvoices)
 
-            let serie = '' + header.number + new Date(date).getFullYear()
+            let serie = '' + header.number + '-' + new Date(date).getFullYear()
             let invoiceNo = (noInvoices + 1)
             var reference = invoiceType + ' ' + serie + '/' + invoiceNo
 

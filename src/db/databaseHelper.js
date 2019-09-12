@@ -95,7 +95,8 @@ module.exports = {
                 }
                 var grossTotal = 0
                 products.forEach(element => {
-                    grossTotal += element.unitPrice * element.quantity
+                    // grossTotal += element.unitPrice * element.quantity
+                    grossTotal += (element.unitPrice * ((element.tax / 100) + 1)) * element.quantity // to include taxes
                 });
                 var newHash = hash(isoDate.slice(0, 10), isoDate, reference, grossTotal.toFixed(2), previousHash)
                 resolve(newHash)
