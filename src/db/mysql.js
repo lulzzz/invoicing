@@ -3,10 +3,10 @@ var fs = require('fs');
 
 var pool = mysql.createPool({
     connectionLimit: 10,
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE,
+    host: 'eu-cdbr-west-02.cleardb.net',
+    user: 'b736eab1b9d8d6',
+    password: 'e3ae70b1',
+    database: 'heroku_86cd5bf3a6220ea',
     dateStrings: true,
     multipleStatements: true
 });
