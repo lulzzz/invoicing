@@ -8,10 +8,10 @@ const hash = (invoiceDate, systemEntrydate, invoiceNo, grosstotal, previousHash)
     console.log(privateKey);
     var message = invoiceDate + ';' + systemEntrydate + ';' + invoiceNo + ';' + grosstotal + ';' + previousHash
 
-    const key = new NodeRSA(privateKey);
-    //const key = new NodeRSA();
+    //const key = new NodeRSA(privateKey);
+    const key = new NodeRSA();
     
-    //key.importKey(privateKey, 'private');
+    key.importKey(privateKey, 'private');
     
     var signed = key.sign(message, 'base64');
     
