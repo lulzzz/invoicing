@@ -89,7 +89,13 @@ const formatData = (data) => {
 const run = async (data) => {
     try {
         let cleanedData = formatData(data)
-        const browser = await puppeteer.launch();
+        //const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+            ],
+        });
         const page = await browser.newPage();
 
         const content = await compile('invoice', cleanedData)
