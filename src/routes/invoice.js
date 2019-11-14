@@ -33,7 +33,7 @@ router.get('/invoices/:ref/pdf', (req, res) => {
     getDetailedInvoiceInfo(req.params.ref).then(async (values) => {
         const pdf = await generatePDF(values, res)
         res.contentType("application/pdf");
-        res.send(pdf);
+        res.send({"pdf":pdf.toString('base64')});
     }).catch((error) => {
         res.status(400).send({ error })
     })
